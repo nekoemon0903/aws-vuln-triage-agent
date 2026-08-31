@@ -1,2 +1,5 @@
 .env
 stack-profile.yaml
+stack-profile-v2.yaml
+archive/
+diary/

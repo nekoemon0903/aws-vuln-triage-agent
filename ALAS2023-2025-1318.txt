@@ -1,0 +1,105 @@
+ALAS2023-2025-1318
+Amazon Linux 2023 Security Advisory: ALAS2023-2025-1318
+Advisory Released Date: 2026-01-07
+Advisory Updated Date: 2026-01-07
+Severity:  Important
+References: CVE-2025-58098 (https://explore.alas.aws.amazon.com/CVE-
+2025-58098.html) CVE-2025-65082
+(https://explore.alas.aws.amazon.com/CVE-2025-65082.html) CVE-2025-
+66200 (https://explore.alas.aws.amazon.com/CVE-2025-66200.html)
+FAQs regarding Amazon Linux ALAS/CVE Severity (../../faqs.html)
+Issue Overview:
+Apache HTTP Server 2.4.65 and earlier with Server Side Includes (SSI) enabled
+and mod_cgid (but not mod_cgi) passes the shell-escaped query string to
+#exec cmd="..." directives. (CVE-2025-58098)
+Improper Neutralization of Escape, Meta, or Control Sequences vulnerability in
+Apache HTTP Server through environment variables set via the Apache
+configuration unexpectedly superseding variables calculated by the server for
+CGI programs.
+This issue affects Apache HTTP Server from 2.4.0 through 2.4.65.
+Users are recommended to upgrade to version 2.4.66 which fixes the issue.
+(CVE-2025-65082)
+mod_userdir+suexec bypass via AllowOverride FileInfo vulnerability in Apache
+HTTP Server. Users with access to use the RequestHeader directive in
+htaccess can cause some CGI scripts to run under an unexpected userid.
+(CVE-2025-66200)
+Affected Packages:
+httpd
+Issue Correction:
+Run dnf update httpd --releasever 2023.10.20260105 or dnf update --advisory
+ALAS2023-2025-1318 --releasever 2023.10.20260105 to update your system.
+More information on how to update your system can be found on this page:
+Amazon Linux 2023 documentation
+(https://docs.aws.amazon.com/linux/al2023/ug/managing-repos-os-
+updates.html)
+2026/08/24 7:12 ALAS2023-2025-1318
+https://alas.aws.amazon.com/AL2023/ALAS2023-2025-1318.html 1/4
+New Packages:
+2026/08/24 7:12 ALAS2023-2025-1318
+https://alas.aws.amazon.com/AL2023/ALAS2023-2025-1318.html 2/4
+aarch64:
+mod_ldap-debuginfo-2.4.66-1.amzn2023.0.1.aarch64
+mod_ssl-debuginfo-2.4.66-1.amzn2023.0.1.aarch64
+mod_session-debuginfo-2.4.66-1.amzn2023.0.1.aarch64
+httpd-tools-debuginfo-2.4.66-1.amzn2023.0.1.aarch64
+mod_ldap-2.4.66-1.amzn2023.0.1.aarch64
+httpd-devel-2.4.66-1.amzn2023.0.1.aarch64
+httpd-tools-2.4.66-1.amzn2023.0.1.aarch64
+httpd-2.4.66-1.amzn2023.0.1.aarch64
+mod_ssl-2.4.66-1.amzn2023.0.1.aarch64
+mod_lua-2.4.66-1.amzn2023.0.1.aarch64
+mod_session-2.4.66-1.amzn2023.0.1.aarch64
+mod_lua-debuginfo-2.4.66-1.amzn2023.0.1.aarch64
+mod_proxy_html-2.4.66-1.amzn2023.0.1.aarch64
+mod_proxy_html-debuginfo-2.4.66-1.amzn2023.0.1.aarc
+h64
+httpd-debugsource-2.4.66-1.amzn2023.0.1.aarch64
+httpd-debuginfo-2.4.66-1.amzn2023.0.1.aarch64
+httpd-core-2.4.66-1.amzn2023.0.1.aarch64
+httpd-core-debuginfo-2.4.66-1.amzn2023.0.1.aarch64
+noarch:
+httpd-manual-2.4.66-1.amzn2023.0.1.noarch
+httpd-filesystem-2.4.66-1.amzn2023.0.1.noarch
+src:
+httpd-2.4.66-1.amzn2023.0.1.src
+x86_64:
+httpd-tools-debuginfo-2.4.66-1.amzn2023.0.1.x86_64
+mod_proxy_html-debuginfo-2.4.66-1.amzn2023.0.1.x86_
+64
+mod_session-debuginfo-2.4.66-1.amzn2023.0.1.x86_64
+mod_lua-debuginfo-2.4.66-1.amzn2023.0.1.x86_64
+mod_ldap-2.4.66-1.amzn2023.0.1.x86_64
+httpd-debugsource-2.4.66-1.amzn2023.0.1.x86_64
+mod_ssl-debuginfo-2.4.66-1.amzn2023.0.1.x86_64
+mod_ssl-2.4.66-1.amzn2023.0.1.x86_64
+httpd-debuginfo-2.4.66-1.amzn2023.0.1.x86_64
+mod_ldap-debuginfo-2.4.66-1.amzn2023.0.1.x86_64
+httpd-devel-2.4.66-1.amzn2023.0.1.x86_64
+httpd-core-2.4.66-1.amzn2023.0.1.x86_64
+httpd-tools-2.4.66-1.amzn2023.0.1.x86_64
+mod_proxy_html-2.4.66-1.amzn2023.0.1.x86_64
+mod_lua-2.4.66-1.amzn2023.0.1.x86_64
+httpd-core-debuginfo-2.4.66-1.amzn2023.0.1.x86_64
+2026/08/24 7:12 ALAS2023-2025-1318
+https://alas.aws.amazon.com/AL2023/ALAS2023-2025-1318.html 3/4
+CVE description copyright © 2023 The MITRE Corporation (https://cve.mitre.org/about/termsofuse.html)
+CVE description copyright © 2023 Red Hat, Inc. Per https://access.redhat.com/security/data
+(https://access.redhat.com/security/data), RedHat's CVE report is licensed under CC BY 4.0
+(https://creativecommons.org/licenses/by/4.0/).
+Privacy (https://aws.amazon.com/privacy/) | Site terms apply, and downloading this site or portions of it
+is permitted (https://aws.amazon.com/terms/) | Cookie preferences | © 2023, Amazon Web Services, Inc.
+or its affiliates. All rights reserved.
+mod_session-2.4.66-1.amzn2023.0.1.x86_64
+httpd-2.4.66-1.amzn2023.0.1.x86_64
+Additional References
+Release Notes: Amazon Linux 2023 Release Notes
+(https://docs.aws.amazon.com/linux/al2023/release-notes/relnotes.html)
+Red Hat: CVE-2025-58098 (https://access.redhat.com/security/cve/CVE-2025-
+58098), CVE-2025-65082 (https://access.redhat.com/security/cve/CVE-2025-
+65082), CVE-2025-66200 (https://access.redhat.com/security/cve/CVE-2025-
+66200)
+Mitre: CVE-2025-58098 (https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-
+2025-58098), CVE-2025-65082 (https://cve.mitre.org/cgi-bin/cvename.cgi?
+name=CVE-2025-65082), CVE-2025-66200 (https://cve.mitre.org/cgi-
+bin/cvename.cgi?name=CVE-2025-66200)
+2026/08/24 7:12 ALAS2023-2025-1318
