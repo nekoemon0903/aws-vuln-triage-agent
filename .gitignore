@@ -1,5 +1,14 @@
+# Environment & Secrets
 .env
+
+# Python & Cache
+__pycache__/
+.pytest_cache/
+
+# Local Configurations (Real Data)
 stack-profile.yaml
 stack-profile-v2.yaml
+
+# Local Notes & Archives
 archive/
 diary/
