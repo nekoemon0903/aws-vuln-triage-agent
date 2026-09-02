@@ -1,55 +1,94 @@
 import os
 from enum import Enum
-from typing import List, Optional
+
 from anthropic import Anthropic
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 # .envファイルから環境変数を読み込む
 load_dotenv()
 
 # === 1. スキーマ定義 ===
 
+
 class Status(str, Enum):
     NEED_ACTION = "要対応"
     NEED_CHECK = "要確認"
     NOT_NEEDED = "対応不要"
+
 
 class UrgencyLevel(str, Enum):
     CRITICAL = "Critical"
     HIGH = "High"
     MEDIUM = "Medium"
 
+
 class CVEResult(BaseModel):
     cve_id: str = Field(description="pureなCVE番号(例: CVE-2025-1318)")
     status: Status = Field(description="トリアージステータス")
-    urgency_level: Optional[UrgencyLevel] = Field(
+    urgency_level: UrgencyLevel | None = Field(
         default=None,
         description="statusが'要対応'の場合のみ設定(Critical/High/Medium)。要確認・対応不要の場合はnull",
     )
-    reason: str = Field(description="【最優先】構成情報と発動条件を照らし合わせた判定根拠")
+    reason: str = Field(
+        description="構成情報と発動条件を照らし合わせた判定根拠。missing_config_keysに挙げた項目が必要な理由も含める"
+    )
+    missing_config_keys: list[str] = Field(
+        default_factory=list,
+        description=(
+            "statusが'要確認'の場合に、判定確定に必要な不足構成項目名を全て挙げたリスト。"
+            "stack-profile.yamlのキーとしてそのまま使える snake_case 表記で出力すること(例: ['mod_cgi_enabled', 'allow_override_fileinfo'])"
+            "statusが'要対応'または'対応不要'の場合は空配列 [] とすること。"
+        ),
+    )
+
+    @model_validator(mode="after")
+    def validate_status_and_missing_keys(self) -> "CVEResult":
+        has_keys = len(self.missing_config_keys) > 0
+
+        # パターン1: 要確認なのにキーが空[]
+        if self.status == Status.NEED_CHECK and not has_keys:
+            raise ValueError(
+                "statusが'要確認'の場合、missing_config_keysに不足キーを1つ以上指定する必要があります。"
+            )
+
+        # パターン2・3: 対応不要 / 要対応 なのにキーが入っている
+        if self.status in {Status.NEED_ACTION, Status.NOT_NEEDED} and has_keys:
+            raise ValueError(
+                f"statusが'{self.status.value}'の場合、missing_config_keysは空リスト [] である必要があります。"
+            )
+
+        return self
+
 
 class LLMOutputSummary(BaseModel):
-    notes: str = Field(description="運用上の制約や人間による確認が必要な事項(例: SGの確認)")
+    notes: str = Field(
+        description="運用上の制約や人間による確認が必要な事項(例: SGの確認)"
+    )
+
 
 class LLMTriageOutput(BaseModel):
     """LLMからの直接レスポンス構造(overall_triage_resultは含めない)"""
+
     summary: LLMOutputSummary
-    cve_results: List[CVEResult]
+    cve_results: list[CVEResult]
+
 
 class FinalTriageReport(BaseModel):
     """コード側でoverall_triage_resultを付与した最終レポート構造"""
+
     overall_triage_result: Status
     notes: str
-    cve_results: List[CVEResult]
+    cve_results: list[CVEResult]
 
 
 # === 2. プロンプト生成 ===
 
+
 def generate_prompt(stack_profile_path: str, alas_text_path: str) -> str:
-    with open(stack_profile_path, 'r', encoding='utf-8') as f:
+    with open(stack_profile_path, "r", encoding="utf-8") as f:
         stack_profile = f.read()
-    with open(alas_text_path, 'r', encoding='utf-8') as f:
+    with open(alas_text_path, "r", encoding="utf-8") as f:
         alas_text = f.read()
 
     prompt = f"""あなたはセキュリティ運用の専門家です。
@@ -65,7 +104,7 @@ def generate_prompt(stack_profile_path: str, alas_text_path: str) -> str:
     1. 脆弱性の発動条件と構成情報を照らし合わせ、CVE単位で判定してください。
     2. cve_idフィールドにはpureなCVE番号(例: CVE-2025-66200)のみを入れ、注釈や補足テキストは一切含めないでください。
     3. 必要条件(対象バージョンやモジュール)が合致していても、追加の発動条件(設定やサブモジュール)の有無が構成情報から読み取れない場合は「要確認」を選択してください。
-    4. **【厳格制約】「要確認」を選択できるのは、stack-profile.yamlに不足している具体的な構成項目名(例: mod_cgiなど、キー候補となりうる名称)を理由内に特定して明示できる場合のみです。具体的な項目名を特定できない場合は必ず「要確認」を選ばず、既存情報のみで「要対応」または「対応不要」に決定してください。**
+    4. **【厳格制約】「要確認」を選択できるのは、stack-profile.yamlに不足している具体的な構成項目名(snake_case表記、例: allow_override_fileinfo, mod_cgi_enabled)を特定できる場合のみです。判定確定に必要な不足項目は missing_config_keys に漏れなく全て配列で抽出し、reason にはその理由を記述してください。具体的な項目名を1つも特定できない場合は「要確認」を選択せず、既存情報のみで「要対応」または「対応不要」に決定してください。**
     5. urgency_levelはstatusが「要対応」の場合のみ設定し、「要確認」「対応不要」の場合は null としてください。
        判定は「攻撃の容易さ(認証有無・アクセス経路)」と「影響範囲」を軸に行います。
        - Critical: 外部/ネットワーク経由で未認証攻撃が可能、かつシステム全体に壊滅的影響を与える（例: 認証不要のRCE）
@@ -77,9 +116,10 @@ def generate_prompt(stack_profile_path: str, alas_text_path: str) -> str:
 
 # === 3. コード側でのステータス畳み込みロジック ===
 
-def derive_overall_status(cve_results: List[CVEResult]) -> Status:
+
+def derive_overall_status(cve_results: list[CVEResult]) -> Status:
     """cve_resultsのステータス集合からoverall_triage_resultを計算
-    
+
     優先度: 要対応 > 要確認 > 対応不要
     """
     statuses = {item.status for item in cve_results}
@@ -92,12 +132,15 @@ def derive_overall_status(cve_results: List[CVEResult]) -> Status:
 
 # === 4. メイン処理 ===
 
+
 def main():
     stack_yaml_path = "stack-profile.yaml"
     alas_text_path = "ALAS2023-2025-1318.txt"
 
     if not os.path.exists(stack_yaml_path) or not os.path.exists(alas_text_path):
-        print(f"エラー: 入力ファイルが見つかりません ({stack_yaml_path} または {alas_text_path})")
+        print(
+            f"エラー: 入力ファイルが見つかりません ({stack_yaml_path} または {alas_text_path})"
+        )
         return
 
     prompt = generate_prompt(stack_yaml_path, alas_text_path)
@@ -110,9 +153,7 @@ def main():
         response = client.messages.parse(
             model="claude-sonnet-5",
             max_tokens=16000,
-            messages=[
-                {"role": "user", "content": prompt}
-            ],
+            messages=[{"role": "user", "content": prompt}],
             output_format=LLMTriageOutput,
         )
 
@@ -132,9 +173,9 @@ def main():
         print("=== パース・検証済みトリアージ結果 ===")
         print(final_report.model_dump_json(indent=2))
 
-    except Exception as e:
+    # リトライ未実装のため ValidationError も握り潰される(2026-09-02時点)
+    except Exception as e:  # noqa: BLE001
         print(f"エラーが発生しました: {e}")
-
 
 
 if __name__ == "__main__":
