@@ -1,5 +1,7 @@
-import os
+import argparse
+import sys
 from enum import Enum
+from pathlib import Path
 
 from anthropic import Anthropic
 from dotenv import load_dotenv
@@ -8,7 +10,7 @@ from pydantic import BaseModel, Field, model_validator
 # .envファイルから環境変数を読み込む
 load_dotenv()
 
-# === 1. スキーマ定義 ===
+# === スキーマ定義 ===
 
 
 class Status(str, Enum):
@@ -82,7 +84,7 @@ class FinalTriageReport(BaseModel):
     cve_results: list[CVEResult]
 
 
-# === 2. プロンプト生成 ===
+# === プロンプト生成 ===
 
 
 def generate_prompt(stack_profile_path: str, alas_text_path: str) -> str:
@@ -114,7 +116,7 @@ def generate_prompt(stack_profile_path: str, alas_text_path: str) -> str:
     return prompt
 
 
-# === 3. コード側でのステータス畳み込みロジック ===
+# === ステータス集計ロジック ===
 
 
 def derive_overall_status(cve_results: list[CVEResult]) -> Status:
@@ -130,20 +132,46 @@ def derive_overall_status(cve_results: list[CVEResult]) -> Status:
     return Status.NOT_NEEDED
 
 
-# === 4. メイン処理 ===
+# === CLI引数パース ===
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Run security triage for given profile."
+    )
+    parser.add_argument(
+        "--profile",
+        required=True,
+        type=Path,
+        help="Path to the stack profile YAML file (Required).",
+    )
+    return parser.parse_args()
+
+
+# === メイン処理 ===
 
 
 def main():
-    stack_yaml_path = "stack-profile.yaml"
-    alas_text_path = "ALAS2023-2025-1318.txt"
+    args = parse_args()
 
-    if not os.path.exists(stack_yaml_path) or not os.path.exists(alas_text_path):
+    if not args.profile.exists():
         print(
-            f"エラー: 入力ファイルが見つかりません ({stack_yaml_path} または {alas_text_path})"
+            f"エラー: プロファイルファイルが見つかりません: {args.profile}",
+            file=sys.stderr,
         )
-        return
+        sys.exit(1)
 
-    prompt = generate_prompt(stack_yaml_path, alas_text_path)
+    alas_text_path = Path("ALAS2023-2025-1318.txt")
+    if not alas_text_path.exists():
+        print(
+            f"エラー: ALASファイルが見つかりません: {alas_text_path}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    print(f"[INFO] Using profile: {args.profile}")
+
+    prompt = generate_prompt(args.profile, alas_text_path)
 
     print("LLM APIを呼び出しています (client.messages.parse)...")
     client = Anthropic()

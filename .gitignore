@@ -7,7 +7,7 @@ __pycache__/
 
 # Local Configurations (Real Data)
 stack-profile.yaml
-stack-profile-v2.yaml
+stack-profile.local.yaml
 
 # Local Notes & Archives
 archive/

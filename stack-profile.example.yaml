@@ -1,0 +1,21 @@
+# コンポーネントごとのコンテキスト定義（今回はhttpdのみ）
+components:
+  httpd:
+    # 1. 誰に渡すか（出口の受取人）
+    owner: "web-dummy@example.jp"
+
+    # 2. なぜ存在するのか（ビジネス上の理由 / 止まった際の影響）
+    usage_context: "コーポレートサイトをホストし、事業活動の継続に必要なため"
+
+    # 3. システムの重要度ランク（※脆弱性の緊急度とは別の、システム自体の重要度）
+    criticality: "medium"
+
+    # 4. 現行の構成（APIで取れない、脆弱性発動条件のジャッジに使用する設定）
+    current_configurations:
+      ssi_enabled: false
+      mod_userdir_enabled: true
+      suexec_enabled: true
+
+    # 5. 運用上の制約（SLAやパッチ適用の条件）
+    operational_constraints:
+      - "パッチ適用（サービス再起動）の際は運用側との事前調整が必要"
