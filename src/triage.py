@@ -62,17 +62,23 @@ class CVEResult(BaseModel):
 
         return self
 
-
-class LLMOutputSummary(BaseModel):
-    notes: str = Field(
-        description="運用上の制約や人間による確認が必要な事項(例: SGの確認)"
-    )
+    @model_validator(mode="after")
+    def validate_urgency_level(self) -> "CVEResult":
+        if self.status == Status.NEED_ACTION and self.urgency_level is None:
+            raise ValueError("statusが'要対応'の場合、urgency_levelの指定は必須です。")
+        if self.status != Status.NEED_ACTION and self.urgency_level is not None:
+            raise ValueError(
+                f"statusが'{self.status.value}'の場合、urgency_levelはnullである必要があります。"
+            )
+        return self
 
 
 class LLMTriageOutput(BaseModel):
     """LLMからの直接レスポンス構造(overall_triage_resultは含めない)"""
 
-    summary: LLMOutputSummary
+    notes: str = Field(
+        description="運用上の制約や人間による確認が必要な事項(例: SGの確認)"
+    )
     cve_results: list[CVEResult]
 
 
@@ -194,7 +200,7 @@ def main():
         # 最終レポートの作成
         final_report = FinalTriageReport(
             overall_triage_result=overall_status,
-            notes=llm_output.summary.notes,
+            notes=llm_output.notes,
             cve_results=llm_output.cve_results,
         )
 
