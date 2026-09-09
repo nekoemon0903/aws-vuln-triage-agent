@@ -30,5 +30,5 @@ def test_urgency_level_validation(status, urgency_level, is_valid):
         result = CVEResult(**data)
         assert result.status == status
     else:
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match="urgency_level"):
             CVEResult(**data)

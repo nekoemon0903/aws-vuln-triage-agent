@@ -93,7 +93,7 @@ class FinalTriageReport(BaseModel):
 # === プロンプト生成 ===
 
 
-def generate_prompt(stack_profile_path: str, alas_text_path: str) -> str:
+def generate_prompt(stack_profile_path: Path, alas_text_path: Path) -> str:
     with open(stack_profile_path, "r", encoding="utf-8") as f:
         stack_profile = f.read()
     with open(alas_text_path, "r", encoding="utf-8") as f:
