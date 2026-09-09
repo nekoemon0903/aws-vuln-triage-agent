@@ -39,7 +39,7 @@ class CVEResult(BaseModel):
         default_factory=list,
         description=(
             "statusが'要確認'の場合に、判定確定に必要な不足構成項目名を全て挙げたリスト。"
-            "stack-profile.yamlのキーとしてそのまま使える snake_case 表記で出力すること(例: ['mod_cgi_enabled', 'allow_override_fileinfo'])"
+            "システム構成情報のキーとしてそのまま使えるsnake_case表記で出力すること(例: ['mod_cgi_enabled', 'allow_override_fileinfo'])。"
             "statusが'要対応'または'対応不要'の場合は空配列 [] とすること。"
         ),
     )
@@ -112,7 +112,7 @@ def generate_prompt(stack_profile_path: str, alas_text_path: str) -> str:
     1. 脆弱性の発動条件と構成情報を照らし合わせ、CVE単位で判定してください。
     2. cve_idフィールドにはpureなCVE番号(例: CVE-2025-66200)のみを入れ、注釈や補足テキストは一切含めないでください。
     3. 必要条件(対象バージョンやモジュール)が合致していても、追加の発動条件(設定やサブモジュール)の有無が構成情報から読み取れない場合は「要確認」を選択してください。
-    4. **【厳格制約】「要確認」を選択できるのは、stack-profile.yamlに不足している具体的な構成項目名(snake_case表記、例: allow_override_fileinfo, mod_cgi_enabled)を特定できる場合のみです。判定確定に必要な不足項目は missing_config_keys に漏れなく全て配列で抽出し、reason にはその理由を記述してください。具体的な項目名を1つも特定できない場合は「要確認」を選択せず、既存情報のみで「要対応」または「対応不要」に決定してください。**
+    4. 「要確認」を選択できるのは、システム構成情報に不足している項目名を具体的に特定できる場合のみです。特定できない場合は既存情報のみで「要対応」または「対応不要」と判定してください。
     5. urgency_levelはstatusが「要対応」の場合のみ設定し、「要確認」「対応不要」の場合は null としてください。
        判定は「攻撃の容易さ(認証有無・アクセス経路)」と「影響範囲」を軸に行います。
        - Critical: 外部/ネットワーク経由で未認証攻撃が可能、かつシステム全体に壊滅的影響を与える（例: 認証不要のRCE）
