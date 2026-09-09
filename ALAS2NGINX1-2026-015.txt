@@ -1,0 +1,83 @@
+ALAS2NGINX1-2026-015
+Amazon Linux 2 (EOS) Security Advisory: ALAS2NGINX1-2026-015
+Advisory Released Date: 2026-08-04
+Advisory Updated Date: 2026-08-04
+Severity:  Important
+References: CVE-2026-42533  CVE-2026-56434  CVE-2026-60005
+FAQs regarding Amazon Linux ALAS/CVE Severity
+Issue Overview:
+A vulnerability exists in NGINX Plus and NGINX Open Source when a map directive uses regex matching and a string expression references the map's regex capture variables before referencing the map output variable. Alternatively, the same result could be achieved by using a non-cacheable variable in a string expression under certain conditions. An unauthenticated attacker along with conditions beyond their control can exploit this vulnerability by sending crafted HTTP requests. This may cause a heap buffer overflow in the NGINX worker process leading to a restart. Additionally, attackers can execute code on systems with Address Space Layout Randomization (ASLR) disabled or when the attacker can bypass ASLR.
+
+Impact:
+This vulnerability may allow remote attackers to cause a denial-of-service (DoS) on the NGINX system or to possibly trigger a code execution. There is no control plane exposure; this is a data plane issue only.
+
+
+Note: Software versions which have reached End of Technical Support (EoTS) are not evaluated. (CVE-2026-42533)
+
+NGINX Plus and NGINX Open Source have a vulnerability in the ngx_http_ssi_module module. This vulnerability may exist when the Server-Side Includes (SSI), proxy_pass, and proxy_buffering off directives are configured. With this configuration, an unauthenticated attacker with man-in-the-middle (MITM) ability to control responses from an upstream server may be able to cause a use-after-free in the NGINX worker process. This issue may lead to limited modification of memory or a restart of the NGINX worker process.
+
+Impact:
+This vulnerability may allow remote attackers to have limited control to modify memory contents or restart the NGINX worker process. There is no control plane exposure; this is a data plane issue only.
+
+Note: Software versions which have reached End of Technical Support (EoTS) are not evaluated. (CVE-2026-56434)
+
+NGINX Plus and NGINX Open Source have a vulnerability in the ngx_http_slice_module module. When the slice directive and unnamed regex captures are configured or when a background cache update happens, unauthenticated attackers can send requests that may cause uninitialized memory access in the NGINX worker process, leading to limited disclosure of memory or a restart.
+
+Impact:
+This vulnerability may allow remote, unauthenticated attackers to have limited control to disclose memory contents or restart the NGINX worker process. There is no control plane exposure; this is a data plane issue only.
+Note: The ngx_http_slice_module module is not enabled by default; it's enabled with the --with-http_slice_module configuration parameter.
+
+Note: Software versions which have reached End of Technical Support (EoTS) are not evaluated. (CVE-2026-60005)
+
+
+Affected Packages:
+nginx
+
+
+Note:
+This advisory is applicable to Amazon Linux 2 - Nginx1 Extra. Visit this page to learn more about Amazon Linux 2 (AL2) Extras and this FAQ section for the difference between AL2 Core and AL2 Extras advisories.
+
+
+Issue Correction:
+Run yum update nginx or yum update --advisory ALAS2NGINX1-2026-015 to update your system.
+
+New Packages:
+aarch64:
+    nginx-1.30.4-1.amzn2.0.1.aarch64
+    nginx-core-1.30.4-1.amzn2.0.1.aarch64
+    nginx-mod-http-geoip-1.30.4-1.amzn2.0.1.aarch64
+    nginx-mod-http-image-filter-1.30.4-1.amzn2.0.1.aarch64
+    nginx-mod-http-perl-1.30.4-1.amzn2.0.1.aarch64
+    nginx-mod-http-xslt-filter-1.30.4-1.amzn2.0.1.aarch64
+    nginx-mod-mail-1.30.4-1.amzn2.0.1.aarch64
+    nginx-mod-stream-1.30.4-1.amzn2.0.1.aarch64
+    nginx-mod-devel-1.30.4-1.amzn2.0.1.aarch64
+    nginx-debuginfo-1.30.4-1.amzn2.0.1.aarch64
+
+noarch:
+    nginx-all-modules-1.30.4-1.amzn2.0.1.noarch
+    nginx-filesystem-1.30.4-1.amzn2.0.1.noarch
+
+src:
+    nginx-1.30.4-1.amzn2.0.1.src
+
+x86_64:
+    nginx-1.30.4-1.amzn2.0.1.x86_64
+    nginx-core-1.30.4-1.amzn2.0.1.x86_64
+    nginx-mod-http-geoip-1.30.4-1.amzn2.0.1.x86_64
+    nginx-mod-http-image-filter-1.30.4-1.amzn2.0.1.x86_64
+    nginx-mod-http-perl-1.30.4-1.amzn2.0.1.x86_64
+    nginx-mod-http-xslt-filter-1.30.4-1.amzn2.0.1.x86_64
+    nginx-mod-mail-1.30.4-1.amzn2.0.1.x86_64
+    nginx-mod-stream-1.30.4-1.amzn2.0.1.x86_64
+    nginx-mod-devel-1.30.4-1.amzn2.0.1.x86_64
+    nginx-debuginfo-1.30.4-1.amzn2.0.1.x86_64
+
+Additional References
+Red Hat: CVE-2026-42533, CVE-2026-56434, CVE-2026-60005
+
+Mitre: CVE-2026-42533, CVE-2026-56434, CVE-2026-60005
+
+CVE description copyright © 2023 The MITRE Corporation
+
+CVE description copyright © 2023 Red Hat, Inc. Per https://access.redhat.com/security/data, RedHat's CVE report is licensed under CC BY 4.0.

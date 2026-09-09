@@ -1,0 +1,126 @@
+ALAS2-2026-3314
+Amazon Linux 2 (EOS) Security Advisory: ALAS2-2026-3314
+Advisory Released Date: 2026-05-26
+Advisory Updated Date: 2026-05-26
+Severity:  Important
+References: CVE-2026-24072  CVE-2026-28780  CVE-2026-29168  CVE-2026-29169  CVE-2026-33006  CVE-2026-33007  CVE-2026-33523  CVE-2026-33857  CVE-2026-34032  CVE-2026-34059
+FAQs regarding Amazon Linux ALAS/CVE Severity
+Issue Overview:
+An escalation of privilege bug in various modules in Apache HTTP 2.4.66 and earlier allows local .htaccess authors to read files with the privileges of the httpd user.
+
+Users are recommended to upgrade to version 2.4.67, which fixes this issue. (CVE-2026-24072)
+
+Heap-based Buffer Overflow vulnerability in mod_proxy_ajp of Apache HTTP Server.
+If mod_proxy_ajp connects to a malicious AJP server this AJP server can send a malicious AJP message back to mod_proxy_ajp and cause it to write 4 attacker controlled bytes after the end of a heap based buffer.
+
+This issue affects Apache HTTP Server: through 2.4.66.
+
+Users are recommended to upgrade to version 2.4.67, which fixes the issue. (CVE-2026-28780)
+
+Allocation of Resources Without Limits or Throttling vulnerability in Apache HTTP Server's mod_md via OCSP response data.
+
+This issue affects Apache HTTP Server: from 2.4.30 through 2.4.66.
+
+Users are recommended to upgrade to version 2.4.67, which fixes the issue. (CVE-2026-29168)
+
+A NULL pointer dereference in mod_dav_lock in Apache HTTP Server 2.4.66 and earlier may allow an attacker to crash the server with a malicious request.mod_dav_lock is not used internally by mod_dav or mod_dav_fs.
+
+The only known use-case for mod_dav_lock was mod_dav_svn from Apache Subversion earlier than version 1.2.0.
+
+Users are recommended to upgrade to version 2.4.66, which fixes this issue, or remove mod_dav_lock. (CVE-2026-29169)
+
+A timing attack against mod_auth_digest in Apache HTTP Server 2.4.66 allows a bypass of Digest authentication by a remote attacker.
+
+Users are recommended to upgrade to version 2.4.67, which fixes this issue. (CVE-2026-33006)
+
+A NULL pointer dereference in the mod_authn_socache in Apache HTTP Server 2.4.66 and earlier allows an unauthenticated remote user to crash a child process in a caching forward proxy configuration.
+
+Users are recommended to upgrade to version 2.4.67, which fixes this issue. (CVE-2026-33007)
+
+HTTP response splitting vulnerability in multiple Apache HTTP Server modules with untrusted or compromised backend servers.
+
+This issue affects Apache HTTP Server: from through 2.4.66.
+
+Users are recommended to upgrade to version 2.4.67, which fixes the issue. (CVE-2026-33523)
+
+Out-of-bounds Read vulnerability in mod_proxy_ajp of
+
+Apache HTTP Server.
+
+This issue affects Apache HTTP Server: through 2.4.66.
+
+Users are recommended to upgrade to version 2.4.67, which fixes the issue. (CVE-2026-33857)
+
+Improper Null Termination, Out-of-bounds Read vulnerability in Apache HTTP Server.
+
+This issue affects Apache HTTP Server: through 2.4.66.
+
+Users are recommended to upgrade to version 2.4.67, which fixes the issue. (CVE-2026-34032)
+
+Buffer Over-read vulnerability in Apache HTTP Server.
+
+This issue affects Apache HTTP Server: through 2.4.66.
+
+Users are recommended to upgrade to version 2.4.67, which fixes the issue. (CVE-2026-34059)
+
+
+Affected Packages:
+httpd
+
+
+Note:
+This advisory is applicable to Amazon Linux 2 (AL2) Core repository. Visit this FAQ section for the difference between AL2 Core and AL2 Extras advisories.
+
+
+Issue Correction:
+Run yum update httpd or yum update --advisory ALAS2-2026-3314 to update your system.
+
+New Packages:
+aarch64:
+    httpd-2.4.67-1.amzn2.0.1.aarch64
+    httpd-devel-2.4.67-1.amzn2.0.1.aarch64
+    httpd-tools-2.4.67-1.amzn2.0.1.aarch64
+    mod_ssl-2.4.67-1.amzn2.0.1.aarch64
+    mod_md-2.4.67-1.amzn2.0.1.aarch64
+    mod_proxy_html-2.4.67-1.amzn2.0.1.aarch64
+    mod_ldap-2.4.67-1.amzn2.0.1.aarch64
+    mod_session-2.4.67-1.amzn2.0.1.aarch64
+    httpd-debuginfo-2.4.67-1.amzn2.0.1.aarch64
+
+i686:
+    httpd-2.4.67-1.amzn2.0.1.i686
+    httpd-devel-2.4.67-1.amzn2.0.1.i686
+    httpd-tools-2.4.67-1.amzn2.0.1.i686
+    mod_ssl-2.4.67-1.amzn2.0.1.i686
+    mod_md-2.4.67-1.amzn2.0.1.i686
+    mod_proxy_html-2.4.67-1.amzn2.0.1.i686
+    mod_ldap-2.4.67-1.amzn2.0.1.i686
+    mod_session-2.4.67-1.amzn2.0.1.i686
+    httpd-debuginfo-2.4.67-1.amzn2.0.1.i686
+
+noarch:
+    httpd-manual-2.4.67-1.amzn2.0.1.noarch
+    httpd-filesystem-2.4.67-1.amzn2.0.1.noarch
+
+src:
+    httpd-2.4.67-1.amzn2.0.1.src
+
+x86_64:
+    httpd-2.4.67-1.amzn2.0.1.x86_64
+    httpd-devel-2.4.67-1.amzn2.0.1.x86_64
+    httpd-tools-2.4.67-1.amzn2.0.1.x86_64
+    mod_ssl-2.4.67-1.amzn2.0.1.x86_64
+    mod_md-2.4.67-1.amzn2.0.1.x86_64
+    mod_proxy_html-2.4.67-1.amzn2.0.1.x86_64
+    mod_ldap-2.4.67-1.amzn2.0.1.x86_64
+    mod_session-2.4.67-1.amzn2.0.1.x86_64
+    httpd-debuginfo-2.4.67-1.amzn2.0.1.x86_64
+
+Additional References
+Red Hat: CVE-2026-24072, CVE-2026-28780, CVE-2026-29168, CVE-2026-29169, CVE-2026-33006, CVE-2026-33007, CVE-2026-33523, CVE-2026-33857, CVE-2026-34032, CVE-2026-34059
+
+Mitre: CVE-2026-24072, CVE-2026-28780, CVE-2026-29168, CVE-2026-29169, CVE-2026-33006, CVE-2026-33007, CVE-2026-33523, CVE-2026-33857, CVE-2026-34032, CVE-2026-34059
+
+CVE description copyright © 2023 The MITRE Corporation
+
+CVE description copyright © 2023 Red Hat, Inc. Per https://access.redhat.com/security/data, RedHat's CVE report is licensed under CC BY 4.0.
