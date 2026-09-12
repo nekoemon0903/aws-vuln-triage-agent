@@ -1,0 +1,18 @@
+inventory:
+  os: "Amazon Linux 2023"
+  packages:
+    httpd: "2.4.65"
+
+components:
+  httpd:
+    owner: "web-support@xxxinc.jp"
+    usage_context: "顧客向けポータルサイトをホストし、事業継続に不可欠な本番環境"
+    criticality: "low"
+    current_configurations:
+      ssi_enabled: true
+      mod_cgid_enabled: true
+      mod_cgi_enabled: false
+      mod_userdir_enabled: false
+      suexec_enabled: false
+    operational_constraints:
+      - "パッチ適用（サービス再起動）の際は運用側との事前調整が必要"

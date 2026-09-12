@@ -151,6 +151,12 @@ def parse_args():
         type=Path,
         help="Path to the stack profile YAML file (Required).",
     )
+    parser.add_argument(
+        "--alas",
+        required=True,
+        type=Path,
+        help="Path to the ALAS text file (Required).",
+    )
     return parser.parse_args()
 
 
@@ -160,24 +166,23 @@ def parse_args():
 def main():
     args = parse_args()
 
-    if not args.profile.exists():
-        print(
-            f"エラー: プロファイルファイルが見つかりません: {args.profile}",
-            file=sys.stderr,
-        )
-        sys.exit(1)
+    errors = []
 
-    alas_text_path = Path("ALAS2023-2025-1318.txt")
-    if not alas_text_path.exists():
-        print(
-            f"エラー: ALASファイルが見つかりません: {alas_text_path}",
-            file=sys.stderr,
-        )
+    if not args.profile.exists():
+        errors.append(f"プロファイルファイルが見つかりません: {args.profile}")
+
+    if not args.alas.exists():
+        errors.append(f"ALASファイルが見つかりません: {args.alas}")
+
+    if errors:
+        for error in errors:
+            print(error, file=sys.stderr)
         sys.exit(1)
 
     print(f"[INFO] Using profile: {args.profile}")
+    print(f"[INFO] Using ALAS file: {args.alas}")
 
-    prompt = generate_prompt(args.profile, alas_text_path)
+    prompt = generate_prompt(args.profile, args.alas)
 
     print("LLM APIを呼び出しています (client.messages.parse)...")
     client = Anthropic()
