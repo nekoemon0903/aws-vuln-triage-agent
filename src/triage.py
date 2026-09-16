@@ -3,12 +3,19 @@ import sys
 from enum import Enum
 from pathlib import Path
 
+import yaml
 from anthropic import Anthropic
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field, model_validator
 
 # .envファイルから環境変数を読み込む
 load_dotenv()
+
+# LLMに渡すことを許可するProfileのホワイトリスト構造
+ALLOWED_PROFILE_PATHS = {
+    "inventory",
+    "components.*.current_configurations",
+}
 
 # === スキーマ定義 ===
 
@@ -57,7 +64,7 @@ class LLMTriageOutput(BaseModel):
     """LLMからの直接レスポンス構造(overall_triage_resultは含めない)"""
 
     notes: str = Field(
-        description="運用上の制約や人間による確認が必要な事項(例: SGの確認)"
+        description="提示されたシステム構成情報や技術的事実に関する補足・注意事項"
     )
     cve_results: list[CVEResult]
 
@@ -75,7 +82,11 @@ class FinalTriageReport(BaseModel):
 
 def generate_prompt(stack_profile_path: Path, alas_text_path: Path) -> str:
     with open(stack_profile_path, "r", encoding="utf-8") as f:
-        stack_profile = f.read()
+        raw_profile_str = f.read()
+
+    # ホワイトリスト抽出へ置き換え
+    stack_profile = extract_facts_profile(raw_profile_str)
+
     with open(alas_text_path, "r", encoding="utf-8") as f:
         alas_text = f.read()
 
@@ -133,6 +144,49 @@ def parse_args():
         help="Path to the ALAS text file (Required).",
     )
     return parser.parse_args()
+
+
+# === ホワイトリスト抽出 ===
+def extract_facts_profile(raw_yaml_str: str) -> str:
+    """ProfileのYAML文字列からホワイトリストに登録された構成情報のみを抽出し、
+    コメントや除外キーを削除したYAML文字列を際シリアライズして返す。
+    未知のキーが存在した場合は[WARN]を出力し、除外する。
+    """
+    data = yaml.safe_load(raw_yaml_str) or {}
+    filtered_data = {}
+
+    # 除外対象の明示的なリスト（警告を出さない対象）
+    known_ignored_keys = {
+        "owner",
+        "usage_context",
+        "criticality",
+        "operational_constraints",
+    }
+
+    # 1. inventoryの抽出
+    if "inventory" in data:
+        filtered_data["inventory"] = data["inventory"]
+
+    # 2. componentsの抽出
+    if "components" in data and isinstance(data["components"], dict):
+        filtered_components = {}
+        for comp_name, comp_value in data["components"].items():
+            if isinstance(comp_value, dict) and "current_configurations" in comp_value:
+                filtered_components[comp_name] = {
+                    "current_configurations": comp_value["current_configurations"]
+                }
+        if filtered_components:
+            filtered_data["components"] = filtered_components
+
+    # 3. 未知キーの判定と警告ログ
+    top_level_keys = set(data.keys())
+    expected_keys = {"inventory", "components"} | known_ignored_keys
+    unknown_keys = top_level_keys - expected_keys
+    if unknown_keys:
+        print(f"[WARN] Profileに未定義の未知のキーが含まれています: {unknown_keys}")
+
+    # 再シリアライズ
+    return yaml.safe_dump(filtered_data, allow_unicode=True, sort_keys=False)
 
 
 # === メイン処理 ===
