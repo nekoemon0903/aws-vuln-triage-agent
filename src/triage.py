@@ -11,10 +11,16 @@ from pydantic import BaseModel, Field, model_validator
 # .envファイルから環境変数を読み込む
 load_dotenv()
 
-# LLMに渡すことを許可するProfileのホワイトリスト構造
-ALLOWED_PROFILE_PATHS = {
+# LLMに渡すことを許可するProfileのホワイトリスト構造定義
+ALLOWED_TOP_LEVEL_KEYS = {
     "inventory",
-    "components.*.current_configurations",
+    "components",
+}
+KNOWN_IGNORED_PROFILE_KEYS = {
+    "owner",
+    "usage_context",
+    "criticality",
+    "operational_constraints",
 }
 
 # === スキーマ定義 ===
@@ -155,14 +161,6 @@ def extract_facts_profile(raw_yaml_str: str) -> str:
     data = yaml.safe_load(raw_yaml_str) or {}
     filtered_data = {}
 
-    # 除外対象の明示的なリスト（警告を出さない対象）
-    known_ignored_keys = {
-        "owner",
-        "usage_context",
-        "criticality",
-        "operational_constraints",
-    }
-
     # 1. inventoryの抽出
     if "inventory" in data:
         filtered_data["inventory"] = data["inventory"]
@@ -180,7 +178,7 @@ def extract_facts_profile(raw_yaml_str: str) -> str:
 
     # 3. 未知キーの判定と警告ログ
     top_level_keys = set(data.keys())
-    expected_keys = {"inventory", "components"} | known_ignored_keys
+    expected_keys = ALLOWED_TOP_LEVEL_KEYS | KNOWN_IGNORED_PROFILE_KEYS
     unknown_keys = top_level_keys - expected_keys
     if unknown_keys:
         print(f"[WARN] Profileに未定義の未知のキーが含まれています: {unknown_keys}")
