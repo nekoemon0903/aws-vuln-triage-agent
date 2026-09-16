@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from src.triage import CVEResult, Status, UrgencyLevel
+from src.triage import CVEResult, Status
 
 
 def test_need_check_with_empty_keys_raises_error():
@@ -36,7 +36,6 @@ def test_need_action_with_keys_raises_error():
         CVEResult(
             cve_id="CVE-2025-0003",
             status=Status.NEED_ACTION,
-            urgency_level=UrgencyLevel.HIGH,
             reason="要対応",
             missing_config_keys=["dummy_key"],
         )

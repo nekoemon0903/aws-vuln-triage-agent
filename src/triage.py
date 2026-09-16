@@ -19,19 +19,9 @@ class Status(str, Enum):
     NOT_NEEDED = "対応不要"
 
 
-class UrgencyLevel(str, Enum):
-    CRITICAL = "Critical"
-    HIGH = "High"
-    MEDIUM = "Medium"
-
-
 class CVEResult(BaseModel):
     cve_id: str = Field(description="pureなCVE番号(例: CVE-2025-1318)")
     status: Status = Field(description="トリアージステータス")
-    urgency_level: UrgencyLevel | None = Field(
-        default=None,
-        description="statusが'要対応'の場合のみ設定(Critical/High/Medium)。要確認・対応不要の場合はnull",
-    )
     reason: str = Field(
         description="構成情報と発動条件を照らし合わせた判定根拠。missing_config_keysに挙げた項目が必要な理由も含める"
     )
@@ -60,16 +50,6 @@ class CVEResult(BaseModel):
                 f"statusが'{self.status.value}'の場合、missing_config_keysは空リスト [] である必要があります。"
             )
 
-        return self
-
-    @model_validator(mode="after")
-    def validate_urgency_level(self) -> "CVEResult":
-        if self.status == Status.NEED_ACTION and self.urgency_level is None:
-            raise ValueError("statusが'要対応'の場合、urgency_levelの指定は必須です。")
-        if self.status != Status.NEED_ACTION and self.urgency_level is not None:
-            raise ValueError(
-                f"statusが'{self.status.value}'の場合、urgency_levelはnullである必要があります。"
-            )
         return self
 
 
@@ -113,11 +93,6 @@ def generate_prompt(stack_profile_path: Path, alas_text_path: Path) -> str:
     2. cve_idフィールドにはpureなCVE番号(例: CVE-2025-66200)のみを入れ、注釈や補足テキストは一切含めないでください。
     3. 必要条件(対象バージョンやモジュール)が合致していても、追加の発動条件(設定やサブモジュール)の有無が構成情報から読み取れない場合は「要確認」を選択してください。
     4. 「要確認」を選択できるのは、システム構成情報に不足している項目名を具体的に特定できる場合のみです。特定できない場合は既存情報のみで「要対応」または「対応不要」と判定してください。
-    5. urgency_levelはstatusが「要対応」の場合のみ設定し、「要確認」「対応不要」の場合は null としてください。
-       判定は「攻撃の容易さ(認証有無・アクセス経路)」と「影響範囲」を軸に行います。
-       - Critical: 外部/ネットワーク経由で未認証攻撃が可能、かつシステム全体に壊滅的影響を与える（例: 認証不要のRCE）
-       - High: 攻撃に認証や内部アクセスを要するが、権限昇格や大規模なサービス停止・データ奪取につながる(例: Privilege Escalation)
-       - Medium: 攻撃に特殊なローカル条件や前提が必要で、影響範囲が局所的・限定的(例: 局所的な情報漏洩、条件付きDoS)
     """
     return prompt
 
