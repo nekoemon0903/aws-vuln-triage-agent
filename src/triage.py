@@ -11,11 +11,17 @@ from pydantic import BaseModel, Field, model_validator
 # .envファイルから環境変数を読み込む
 load_dotenv()
 
-# LLMに渡すことを許可するProfileのホワイトリスト構造定義
-ALLOWED_TOP_LEVEL_KEYS = {
+# === スキーマ・定数定義 ===
+
+# LLMに渡すことを許可する Profile のパス定義 (Single Source of Truth)
+ALLOWED_PROFILE_PATHS = [
     "inventory",
-    "components",
-}
+    "components.*.current_configurations",
+]
+
+# 定義からトップレベルの許可キー集合を自動導出 (二重管理を解消)
+ALLOWED_TOP_LEVEL_KEYS = {p.split(".")[0] for p in ALLOWED_PROFILE_PATHS}
+
 KNOWN_IGNORED_PROFILE_KEYS = {
     "owner",
     "usage_context",
@@ -153,35 +159,67 @@ def parse_args():
 
 
 # === ホワイトリスト抽出 ===
+
+
 def extract_facts_profile(raw_yaml_str: str) -> str:
-    """ProfileのYAML文字列からホワイトリストに登録された構成情報のみを抽出し、
-    コメントや除外キーを削除したYAML文字列を際シリアライズして返す。
-    未知のキーが存在した場合は[WARN]を出力し、除外する。
+    """ProfileのYAML文字列から ALLOWED_PROFILE_PATHS に定義された情報のみを動的に抽出し、
+    未知のキーが存在した場合は [WARN] を stderr に出力する。
     """
     data = yaml.safe_load(raw_yaml_str) or {}
+    if not isinstance(data, dict):
+        return yaml.safe_dump({}, allow_unicode=True)
+
+    # 1. トップレベルの未知キーチェック
+    top_level_keys = set(data.keys())
+    expected_top_keys = ALLOWED_TOP_LEVEL_KEYS | KNOWN_IGNORED_PROFILE_KEYS
+    unknown_top_keys = top_level_keys - expected_top_keys
+    if unknown_top_keys:
+        print(
+            f"[WARN] Profileに未定義の未知のキーが含まれています: {unknown_top_keys}",
+            file=sys.stderr,
+        )
+
+    # 2. パス定義(ALLOWED_PROFILE_PATHS)に基づく動的抽出処理
     filtered_data = {}
 
-    # 1. inventoryの抽出
-    if "inventory" in data:
-        filtered_data["inventory"] = data["inventory"]
+    for path in ALLOWED_PROFILE_PATHS:
+        parts = path.split(".")
 
-    # 2. componentsの抽出
-    if "components" in data and isinstance(data["components"], dict):
-        filtered_components = {}
-        for comp_name, comp_value in data["components"].items():
-            if isinstance(comp_value, dict) and "current_configurations" in comp_value:
-                filtered_components[comp_name] = {
-                    "current_configurations": comp_value["current_configurations"]
-                }
-        if filtered_components:
-            filtered_data["components"] = filtered_components
+        # パターンA: 1段のパス (例: "inventory")
+        if len(parts) == 1:
+            key = parts[0]
+            if key in data:
+                filtered_data[key] = data[key]
+            continue
 
-    # 3. 未知キーの判定と警告ログ
-    top_level_keys = set(data.keys())
-    expected_keys = ALLOWED_TOP_LEVEL_KEYS | KNOWN_IGNORED_PROFILE_KEYS
-    unknown_keys = top_level_keys - expected_keys
-    if unknown_keys:
-        print(f"[WARN] Profileに未定義の未知のキーが含まれています: {unknown_keys}")
+        # パターンB: 3段・ワイルドカード挟み (例: "components.*.current_configurations")
+        if len(parts) == 3 and parts[1] == "*":
+            top_key, _, target_subkey = parts
+            components_data = data.get(top_key)
+            if not isinstance(components_data, dict):
+                continue
+
+            filtered_sub = {}
+            for comp_name, comp_val in components_data.items():
+                if not isinstance(comp_val, dict):
+                    continue
+
+                # ワイルドカード階層配下の未知キー検証
+                comp_subkeys = set(comp_val.keys())
+                expected_subkeys = {target_subkey} | KNOWN_IGNORED_PROFILE_KEYS
+                unknown_subkeys = comp_subkeys - expected_subkeys
+                if unknown_subkeys:
+                    print(
+                        f"[WARN] {top_key}.{comp_name} に未定義のキーが含まれています: {unknown_subkeys}",
+                        file=sys.stderr,
+                    )
+
+                # 対象キーの抽出
+                if target_subkey in comp_val:
+                    filtered_sub[comp_name] = {target_subkey: comp_val[target_subkey]}
+
+            if filtered_sub:
+                filtered_data[top_key] = filtered_sub
 
     # 再シリアライズ
     return yaml.safe_dump(filtered_data, allow_unicode=True, sort_keys=False)

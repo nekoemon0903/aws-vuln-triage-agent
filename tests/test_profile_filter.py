@@ -1,9 +1,14 @@
+import pytest
 import yaml
 
-from src.triage import extract_facts_profile
+from src.triage import (
+    ALLOWED_TOP_LEVEL_KEYS,
+    extract_facts_profile,
+)
 
 
 def test_extract_facts_profile_filters_unwanted_keys_and_components():
+    """正常系プロファイルからのフィルタリング処理の検証"""
     dummy_yaml = """
     # このコメントは除去されるべき
     owner: sec-ops-team
@@ -48,3 +53,86 @@ def test_extract_facts_profile_filters_unwanted_keys_and_components():
     assert "sec-ops-team" not in filtered_yaml_str
     assert "Do not touch" not in filtered_yaml_str
     assert "# このコメントは除去されるべき" not in filtered_yaml_str
+
+
+def test_extract_facts_profile_inventory_passthrough():
+    """inventory キー配下がそのまま透過的に保持されること"""
+    yaml_input = """
+    inventory:
+      os: "Amazon Linux 2023"
+      arch: "x86_64"
+    """
+    result = extract_facts_profile(yaml_input)
+    parsed = yaml.safe_load(result)
+    assert parsed == {"inventory": {"os": "Amazon Linux 2023", "arch": "x86_64"}}
+
+
+def test_extract_facts_profile_components_wildcard_and_warn(capsys):
+    """components.* 配下で current_configurations のみを抽出し、未定義キーは WARN(stderr)"""
+    yaml_input = """
+    components:
+      web01:
+        current_configurations:
+          mod_cgi_enabled: true
+        unexpected_extra_key: "警告対象の値"
+    """
+    result = extract_facts_profile(yaml_input)
+    parsed = yaml.safe_load(result)
+    captured = capsys.readouterr()
+
+    # 抽出結果の検証
+    assert parsed["components"]["web01"] == {
+        "current_configurations": {"mod_cgi_enabled": True}
+    }
+    assert "unexpected_extra_key" not in result
+
+    # stderr への WARN 出力検証
+    assert "[WARN] components.web01 に未定義のキーが含まれています" in captured.err
+    assert "unexpected_extra_key" in captured.err
+
+
+def test_extract_facts_profile_path_driven_top_level_warn(capsys):
+    """パス定義からの動的導出とトップレベル未知キーの WARN(stderr) 検知"""
+    # ALLOWED_TOP_LEVEL_KEYS が ALLOWED_PROFILE_PATHS から自動導出されていることを検証
+    assert "inventory" in ALLOWED_TOP_LEVEL_KEYS
+    assert "components" in ALLOWED_TOP_LEVEL_KEYS
+
+    yaml_input = """
+    unknown_top_level_section:
+      some_key: "value"
+    """
+    result = extract_facts_profile(yaml_input)
+    captured = capsys.readouterr()
+
+    assert "unknown_top_level_section" not in result
+    assert "[WARN] Profileに未定義の未知のキーが含まれています" in captured.err
+    assert "unknown_top_level_section" in captured.err
+
+
+def test_extract_facts_profile_edge_cases():
+    """無効なデータ構造や全滅パターンのエッジケース検証"""
+    # current_configurations が存在しないため components 全体が除外されて空データ（{}）になるケース
+    yaml_input = """
+    components:
+      valkey:
+        other_unrelated_key: "value"
+    """
+    result = extract_facts_profile(yaml_input)
+    parsed = yaml.safe_load(result)
+    assert parsed == {}
+
+
+@pytest.mark.parametrize(
+    "invalid_input",
+    [
+        "just a scalar string",
+        "- item1\n- item2",  # リスト構造
+        "12345",
+        "true",
+    ],
+)
+def test_extract_facts_profile_non_dict_input(invalid_input):
+    """isinstance(data, dict)を満たさない入力の場合、例外を出さず空データ({})を返すこと"""
+    result = extract_facts_profile(invalid_input)
+    parsed = yaml.safe_load(result)
+    assert parsed == {}
