@@ -110,16 +110,16 @@ def test_extract_facts_profile_path_driven_top_level_warn(capsys):
 
 
 def test_extract_facts_profile_edge_cases():
-    """無効なデータ構造や全滅パターンのエッジケース検証"""
-    # current_configurations が存在しないため components 全体が除外されて空データ（{}）になるケース
+    """抽出結果が全滅する場合、ValueErrorを送出すること"""
     yaml_input = """
+    inventory:
+      os: "Amazon Linux 2023"
     components:
       valkey:
         other_unrelated_key: "value"
     """
-    result = extract_facts_profile(yaml_input)
-    parsed = yaml.safe_load(result)
-    assert parsed == {}
+    with pytest.raises(ValueError):
+        extract_facts_profile(yaml_input)
 
 
 @pytest.mark.parametrize(
@@ -136,3 +136,50 @@ def test_extract_facts_profile_non_dict_input(invalid_input):
     result = extract_facts_profile(invalid_input)
     parsed = yaml.safe_load(result)
     assert parsed == {}
+
+
+def test_extract_facts_profile_missing_current_configurations_warn(capsys):
+    """current_configurationsを持たないコンポーネントがあればWARNを出力し、正常なコンポーネントは残る"""
+    yaml_input = """
+    components:
+      httpd:
+        current_configurations:
+          mod_cgi_enabled: true
+      valkey:
+        owner: "sec-ops-team"
+        criticality: "high"
+    """
+    result = extract_facts_profile(yaml_input)
+    parsed = yaml.safe_load(result)
+    captured = capsys.readouterr()
+
+    # httpdは残っていること
+    assert "httpd" in parsed["components"]
+    # stderrにvalkeyに対するWARNが出力されていること
+    assert "[WARN]" in captured.err
+    assert "valkey" in captured.err
+
+
+@pytest.mark.parametrize(
+    "empty_val",
+    [
+        "php: {}",  # 空辞書
+        "php:",  # Noneにパースされるケース
+    ],
+)
+def test_extract_facts_profile_empty_component_warn(empty_val, capsys):
+    """コンポーネントの中身が{}やNoneの場合でもクラッシュせずWARNを出力する"""
+    yaml_input = f"""
+    components:
+      httpd:
+        current_configurations:
+          mod_cgi_enabled: true
+      {empty_val}
+    """
+    result = extract_facts_profile(yaml_input)
+    parsed = yaml.safe_load(result)
+    captured = capsys.readouterr()
+
+    assert "httpd" in parsed["components"]
+    assert "[WARN]" in captured.err
+    assert "php" in captured.err

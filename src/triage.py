@@ -202,6 +202,10 @@ def extract_facts_profile(raw_yaml_str: str) -> str:
             filtered_sub = {}
             for comp_name, comp_val in components_data.items():
                 if not isinstance(comp_val, dict):
+                    print(
+                        f"[WARN] {top_key}.{comp_name} の値が空またはNoneです",
+                        file=sys.stderr,
+                    )
                     continue
 
                 # ワイルドカード階層配下の未知キー検証
@@ -217,9 +221,17 @@ def extract_facts_profile(raw_yaml_str: str) -> str:
                 # 対象キーの抽出
                 if target_subkey in comp_val:
                     filtered_sub[comp_name] = {target_subkey: comp_val[target_subkey]}
+                else:
+                    print(
+                        f"[WARN] {top_key}.{comp_name} に {target_subkey} が含まれていません",
+                        file=sys.stderr,
+                    )
 
             if filtered_sub:
                 filtered_data[top_key] = filtered_sub
+            elif components_data:
+                # 元データがあり全て無効なキーの場合エラーを送出
+                raise ValueError(f"{top_key} の抽出結果が空になりました")
 
     # 再シリアライズ
     return yaml.safe_dump(filtered_data, allow_unicode=True, sort_keys=False)
