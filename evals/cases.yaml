@@ -1,0 +1,52 @@
+# パスの起点はリポジトリのルート
+
+- id: "case_001"
+  cell: 1
+  description: "要対応: 情報が揃っており、発動条件を満たす"
+  profile_path: "stack-profile.vulnerable.yaml"
+  alas_path: "ALAS2023-2025-1318.txt"
+  cve_id: "CVE-2025-58098"
+  expected:
+    status: "要対応"
+    missing_config_keys: []
+
+- id: "case_002"
+  cell: 2
+  description: "要確認: mod_userdir, suexec は true だが allow_override_fileinfo のみ未定義(不足1つ)"
+  profile_path: "stack-profile.yaml"
+  alas_path: "ALAS2023-2025-1318.txt"
+  cve_id: "CVE-2025-66200"
+  expected:
+    status: "要確認"
+    missing_config_keys: ["allow_override_fileinfo"]
+
+# TODO(cell 3): 既存profileでは表現不可(SSI=true かつ不足キー2つ以上のprofileがない)。10月のデータ作成で新規profileを作る
+# - id: "case_003"
+#   cell: 3
+#   description: "要確認: 不足キーが2つ以上(mod_cgid_enabled, allow_override_fileinfo等が未定義)"
+#   profile_path: "stack-profile.example.yaml"
+#   alas_path: "ALAS2023-2025-1318.txt"
+#   cve_id: "CVE-2025-58098"
+#   expected:
+#     status: "要確認"
+#     missing_config_keys: ["mod_cgid_enabled", "allow_override_fileinfo"]
+
+- id: "case_004"
+  cell: 4
+  description: "対応不要: valkeyが未導入(installed: false)のため影響を受けない"
+  profile_path: "stack-profile.yaml"
+  alas_path: "ALAS2023-2026-3091.txt"
+  cve_id: "CVE-2026-82631"
+  expected:
+    status: "対応不要"
+    missing_config_keys: []
+
+- id: "case_005"
+  cell: 5
+  description: "対応不要: mod_cgi_enabledが未定義だが、ssi_enabled: false かつ mod_cgid_enabled: false のため条件崩れ"
+  profile_path: "stack-profile.yaml"
+  alas_path: "ALAS2023-2025-1318.txt"
+  cve_id: "CVE-2025-58098"
+  expected:
+    status: "対応不要"
+    missing_config_keys: []
