@@ -92,15 +92,10 @@ class FinalTriageReport(BaseModel):
 # === プロンプト生成 ===
 
 
-def generate_prompt(stack_profile_path: Path, alas_text_path: Path) -> str:
-    with open(stack_profile_path, "r", encoding="utf-8") as f:
-        raw_profile_str = f.read()
+def generate_prompt(profile_yaml: str, alas_text: str) -> str:
 
     # ホワイトリスト抽出へ置き換え
-    stack_profile = extract_facts_profile(raw_profile_str)
-
-    with open(alas_text_path, "r", encoding="utf-8") as f:
-        alas_text = f.read()
+    stack_profile = extract_facts_profile(profile_yaml)
 
     prompt = f"""あなたはセキュリティ運用の専門家です。
     以下の「システム構成情報」と「脆弱性情報(ALAS)」を突き合わせ、CVE単位でのトリアージ判定を行ってください。
@@ -237,6 +232,39 @@ def extract_facts_profile(raw_yaml_str: str) -> str:
     return yaml.safe_dump(filtered_data, allow_unicode=True, sort_keys=False)
 
 
+# === 判定処理 ===
+
+
+# TODO: triage_advisory の直接的なユニットテスト（モックを使ったテスト等）を追加する
+def triage_advisory(
+    profile_yaml: str,
+    alas_text: str,
+    client: Anthropic,
+) -> FinalTriageReport:
+    """1件のadvisoryを判定する。例外は呼び出し元に任せる"""
+
+    # 1. プロンプト生成
+    prompt = generate_prompt(profile_yaml, alas_text)
+
+    # 2. LLM API呼び出し(Structured Outputs)
+    response = client.messages.parse(
+        model="claude-sonnet-5",
+        max_tokens=16000,
+        messages=[{"role": "user", "content": prompt}],
+        output_format=LLMTriageOutput,
+    )
+
+    # 3. 戻り値の構築(例外処理は外側の読み出し元に任せる)
+    llm_output: LLMTriageOutput = response.parsed_output
+    overall_status = derive_overall_status(llm_output.cve_results)
+
+    return FinalTriageReport(
+        overall_triage_result=overall_status,
+        notes=llm_output.notes,
+        cve_results=llm_output.cve_results,
+    )
+
+
 # === メイン処理 ===
 
 
@@ -259,32 +287,14 @@ def main():
     print(f"[INFO] Using profile: {args.profile}")
     print(f"[INFO] Using ALAS file: {args.alas}")
 
-    prompt = generate_prompt(args.profile, args.alas)
+    profile_yaml = args.profile.read_text(encoding="utf-8")
+    alas_text = args.alas.read_text(encoding="utf-8")
 
     print("LLM APIを呼び出しています (client.messages.parse)...")
     client = Anthropic()
 
     try:
-        # Structured Outputs (client.messages.parse)を使用
-        response = client.messages.parse(
-            model="claude-sonnet-5",
-            max_tokens=16000,
-            messages=[{"role": "user", "content": prompt}],
-            output_format=LLMTriageOutput,
-        )
-
-        # 型保証された Pydantic オブジェクトを取得
-        llm_output: LLMTriageOutput = response.parsed_output
-
-        # overall_triage_result をコード側で集計計算
-        overall_status = derive_overall_status(llm_output.cve_results)
-
-        # 最終レポートの作成
-        final_report = FinalTriageReport(
-            overall_triage_result=overall_status,
-            notes=llm_output.notes,
-            cve_results=llm_output.cve_results,
-        )
+        final_report = triage_advisory(profile_yaml, alas_text, client)
 
         print("=== パース・検証済みトリアージ結果 ===")
         print(final_report.model_dump_json(indent=2))
