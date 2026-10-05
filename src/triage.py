@@ -39,7 +39,7 @@ class Status(str, Enum):
 
 
 class CVEResult(BaseModel):
-    cve_id: str = Field(description="pureなCVE番号(例: CVE-2025-1318)")
+    cve_id: str = Field(description="CVE-2025-xxxxxのようなpureなCVE番号")
     status: Status = Field(description="トリアージステータス")
     reason: str = Field(
         description="構成情報と発動条件を照らし合わせた判定根拠。missing_config_keysに挙げた項目が必要な理由も含める"
