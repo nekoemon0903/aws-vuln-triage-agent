@@ -12,3 +12,6 @@ stack-profile.local.yaml
 # Local Notes & Archives
 archive/
 diary/
+
+# Evals実行結果(実環境構成等の情報保護のため)
+evals/results/
