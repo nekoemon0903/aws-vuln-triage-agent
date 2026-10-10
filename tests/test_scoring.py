@@ -83,11 +83,11 @@ def test_evaluate_gate_execution_error_passes_with_reasons():
     assert "実行時エラー" in reasons[0]
 
 
-# 観点5: 安全側(期待が「対応不要」)  → 関門の対象外(合格扱い)
-def test_evaluate_gate_not_needed_target_ignored():
+# 観点5: 安全側(期待が「対応不要」)  → 関門の対象外
+def test_evaluate_gate_returns_none_for_not_needed_target():
     results = [make_run_result(i, actual_status=Status.NOT_NEEDED) for i in range(1, 6)]
     is_passed, reasons = evaluate_gate(Status.NOT_NEEDED, results)
-    assert is_passed is True
+    assert is_passed is None
     assert len(reasons) == 0
 
 
@@ -150,3 +150,58 @@ def test_summarize_case_evaluation():
     assert summary.accuracy_rate == 1.0
     assert summary.key_coverage_rate is None
     assert summary.outcome_counts[ExecutionOutcome.SUCCESS] == 5
+
+
+def test_evaluate_gate_passes_on_wrong_status_other_than_not_needed():
+    """
+    検証内容: 危険側(期待が「要対応」)において、「要確認」が出た場合でも、関門は合格(True)になること。
+    振る舞い検証: 関門は「対応不要」のすり抜けのみを弾き、安全側へのズレで合否を落とさない(正解率で評価する)振る舞いを保証する。
+    """
+    results = [
+        make_run_result(i, actual_status=Status.NEED_ACTION) for i in range(1, 5)
+    ]
+    results.append(make_run_result(5, actual_status=Status.NEED_CHECK))
+    is_passed, reasons = evaluate_gate(Status.NEED_ACTION, results)
+    assert is_passed is True
+    assert len(reasons) == 0
+
+
+def test_evaluate_gate_validation_error_passes_with_reasons():
+    """
+    検証内容: 実行結果にVALIDATION_ERRORが含まれる場合でも関門は合格(True)となり、理由メッセージが残ること。
+    振る舞い検証: API_ERRORと同様、検証失敗も関門では不合格にせず、人が気づけるよう理由を残して正解率で評価する振る舞いを保証する。
+    """
+    results = [
+        make_run_result(i, actual_status=Status.NEED_ACTION) for i in range(1, 5)
+    ]
+    results.append(
+        make_run_result(
+            5,
+            outcome=ExecutionOutcome.VALIDATION_ERROR,
+            error_message="Validation Error",
+        )
+    )
+    is_passed, reasons = evaluate_gate(Status.NEED_ACTION, results)
+    assert is_passed is True
+    assert len(reasons) == 1
+    assert "validation_error" in reasons[0]
+
+
+@pytest.mark.parametrize("error_run_index", [1, 5])
+def test_evaluate_gate_unaffected_by_result_order(error_run_index):
+    """
+    検証内容: 失敗(対応不要)の発生位置(1回目か5回目か)に関わらず不合格(False)になり、正しい発生回数が理由に残ること。
+    振る舞い検証: 途中で早期returnしたり、最後の実行結果で上書きしたりするバグを防ぎ、発生位置を正確に記録できるかを検証する。
+    """
+    results = []
+    for i in range(1, 6):
+        if i == error_run_index:
+            results.append(make_run_result(i, actual_status=Status.NOT_NEEDED))
+        else:
+            results.append(make_run_result(i, actual_status=Status.NEED_ACTION))
+
+    is_passed, reasons = evaluate_gate(Status.NEED_ACTION, results)
+    assert is_passed is False
+    # エラーが発生した回数がメッセージに正しく含まれること
+    assert len(reasons) == 1
+    assert f"Run {error_run_index}" in reasons[0]

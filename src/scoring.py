@@ -39,7 +39,7 @@ class CaseSummary(BaseModel):
 def evaluate_gate(
     expected_status: Status,
     run_results: list[CaseRunResult],
-) -> tuple[bool, list[str]]:
+) -> tuple[bool | None, list[str]]:
     """関門セルの合否を判定する。
 
     - 実行結果が exactly 5 件でない場合は ValueError
@@ -56,7 +56,7 @@ def evaluate_gate(
 
     # 安全側ケースは関門判定の対象外
     if expected_status == Status.NOT_NEEDED:
-        return True, []
+        return None, []
 
     is_passed = True
     failure_reasons = []
