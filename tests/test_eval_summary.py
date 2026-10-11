@@ -48,7 +48,15 @@ def test_load_run_results_cve_missing_mapping(tmp_path: Path):
         "case_id": "case_001",
         "run_index": 1,
         "status": "SUCCESS",
-        "detail": {"cve_results": {}},  # CVEが存在しない
+        "detail": {
+            "cve_results": [
+                {
+                    "cve_id": "CVE-9999-9999",  # 違うCVE
+                    "status": "要確認",
+                    "missing_config_keys": [],
+                }
+            ]
+        },
     }
     json_path.write_text(json.dumps(data), encoding="utf-8")
 
@@ -84,7 +92,7 @@ def test_load_run_results_api_error_mapping(tmp_path: Path):
         "case_id": "case_001",
         "run_index": 1,
         "status": "API_ERROR",
-        "error_message": "500 Server Error",
+        "detail": "500 Server Error",
     }
     json_path.write_text(json.dumps(data), encoding="utf-8")
 
@@ -133,36 +141,71 @@ def test_load_run_results_missing_file_raises_error(tmp_path: Path):
     """
     検証内容: 5回分の実行結果JSONのうちファイルが一部欠落(例: 4件しか存在しない)している場合、不正データとしてエラーが発生すること。
     """
+    # 本番の配置を再現 (ALASはルート、cases.yamlは evals/ ディレクトリ内)
+    evals_dir = tmp_path / "evals"
+    evals_dir.mkdir()
+
+    alas_file = tmp_path / "ALAS2023-2025-1318.txt"
+    alas_file.write_text("CVE-1", encoding="utf-8")
+
+    cases_yaml = evals_dir / "cases.yaml"
+    cases_yaml.write_text(
+        "- id: case_001\n"
+        "  cell: 1\n"
+        "  description: dummy\n"
+        "  profile_path: stack-profile.yaml\n"
+        "  alas_path: ALAS2023-2025-1318.txt\n"
+        "  cve_id: CVE-1\n"
+        "  expected:\n"
+        f"    status: {Status.NEED_ACTION.value}\n"
+    )
+
     # 4件しかファイルを作成しない
+    results_dir = tmp_path / "results"
+    results_dir.mkdir()
     for i in range(1, 5):
-        (tmp_path / f"case_001_run_{i}.json").write_text("{}", encoding="utf-8")
+        (results_dir / f"case_001_run_{i}.json").write_text("{}", encoding="utf-8")
 
-        cases_yaml = tmp_path / "cases.yaml"
-        cases_yaml.write_text(
-            "- id: case_001\n"
-            "  cve_id: CVE-1\n"
-            "  expected:\n"
-            f"    status: {Status.NEED_ACTION.value}\n"
-        )
-
-        with pytest.raises(ValueError):
-            summarize_all_cases(tmp_path, cases_yaml)
+    with pytest.raises(ValueError):
+        summarize_all_cases(results_dir, cases_yaml)
 
 
 # 8. ケースごとの分離集計検証(データ取り違え検知)
-def test_summarize_all_cases_separates_by_case_id(tmp_path):
+def test_summarize_all_cases_separates_by_case_id(tmp_path: Path):
     """
     検証内容: 複数ケース(case_001: 期待=要対応/結果=要対応, case_002: 期待=要確認/結果=要確認)が存在する場合、それぞれの期待値と組み合わせて集計されること。
             (取り違えが発生すると正解率が1.0から0.0に落ちることで検知)
     """
-    # case_001: 期待=NEED_ACTION / 結果=NEED_ACTION
-    # case_002: 期待=NEED_CHECK / 結果=NEED_CHECK
-    # ※入れ替わると正解率が1.0から0.0になるデータ構造
-    cases_yaml = tmp_path / "cases.yaml"
+    # 本番の配置を再現 (ALASはルート、cases.yamlは evals/ ディレクトリ内)
+    evals_dir = tmp_path / "evals"
+    evals_dir.mkdir()
+
+    alas_file = tmp_path / "ALAS2023-2025-1318.txt"
+    alas_file.write_text("CVE-1 CVE-2", encoding="utf-8")
+
+    cases_yaml = evals_dir / "cases.yaml"
     cases_yaml.write_text(
-        f"- id: case_001\n  cve_id: CVE-1\n  expected:\n    status: {Status.NEED_ACTION.value}\n"
-        f"- id: case_002\n  cve_id: CVE-2\n  expected:\n    status: {Status.NEED_CHECK.value}\n"
+        f"- id: case_001\n"
+        f"  cell: 1\n"
+        f"  description: dummy1\n"
+        f"  profile_path: stack-profile.yaml\n"
+        f"  alas_path: ALAS2023-2025-1318.txt\n"
+        f"  cve_id: CVE-1\n"
+        f"  expected:\n"
+        f"    status: {Status.NEED_ACTION.value}\n"
+        f"- id: case_002\n"
+        f"  cell: 2\n"
+        f"  description: dummy2\n"
+        f"  profile_path: stack-profile.yaml\n"
+        f"  alas_path: ALAS2023-2025-1318.txt\n"
+        f"  cve_id: CVE-2\n"
+        f"  expected:\n"
+        f"    status: {Status.NEED_CHECK.value}\n"
+        f'    missing_config_keys: ["key1"]\n'
     )
+
+    results_dir = tmp_path / "results"
+    results_dir.mkdir()
 
     for i in range(1, 6):
         d1 = {
@@ -181,10 +224,10 @@ def test_summarize_all_cases_separates_by_case_id(tmp_path):
                 "cve_results": [{"cve_id": "CVE-2", "status": Status.NEED_CHECK.value}]
             },
         }
-        (tmp_path / f"case_001_run_{i}.json").write_text(json.dumps(d1))
-        (tmp_path / f"case_002_run_{i}.json").write_text(json.dumps(d2))
+        (results_dir / f"case_001_run_{i}.json").write_text(json.dumps(d1))
+        (results_dir / f"case_002_run_{i}.json").write_text(json.dumps(d2))
 
-    summaries = summarize_all_cases(tmp_path, cases_yaml)
+    summaries = summarize_all_cases(results_dir, cases_yaml)
     assert summaries["case_001"].accuracy_rate == 1.0
     assert summaries["case_002"].accuracy_rate == 1.0
 
@@ -196,7 +239,6 @@ def test_format_case_summary_output_handles_none_gate():
     """
     summary = CaseSummary(
         case_id="case_003",
-        target_status=Status.NOT_NEEDED,
         is_passed=None,  # 安全側・対応不要
         accuracy_rate=1.0,
         key_coverage_rate=None,

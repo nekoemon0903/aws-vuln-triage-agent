@@ -1,8 +1,7 @@
 import json
 from pathlib import Path
 
-import yaml
-
+from src.cases import load_and_validate_cases
 from src.scoring import (
     CaseRunResult,
     CaseSummary,
@@ -84,16 +83,16 @@ def load_case_run_result(json_path: Path, cve_id: str) -> CaseRunResult:
 def summarize_all_cases(
     results_dir: Path, cases_yaml_path: Path
 ) -> dict[str, CaseSummary]:
-    cases_data = yaml.safe_load(cases_yaml_path.read_text(encoding="utf-8"))
+    cases = load_and_validate_cases(
+        cases_yaml_path, base_dir=cases_yaml_path.parent.parent
+    )
     summaries: dict[str, CaseSummary] = {}
 
-    # 本番の cases.yaml は list 構造
-    for case_info in cases_data:
-        case_id = case_info["id"]
-        target_cve = case_info["cve_id"]
-        expected = case_info.get("expected", {})
-        expected_status = Status(expected["status"])
-        expected_keys = expected.get("missing_config_keys", []) or []
+    for case in cases:
+        case_id = case.id
+        target_cve = case.cve_id
+        expected_status = case.expected.status
+        expected_keys = case.expected.missing_config_keys or []
 
         json_files = sorted(results_dir.glob(f"{case_id}_run_*.json"))
         if len(json_files) != 5:

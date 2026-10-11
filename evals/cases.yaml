@@ -33,7 +33,7 @@
 
 - id: "case_004"
   cell: 4
-  description: "対応不要: valkeyが未導入(installed: false)のため影響を受けない"
+  description: "対応不要: valkey未導入(installed: false)。発動条件はバージョンのみのため未導入で確定"
   profile_path: "stack-profile.yaml"
   alas_path: "ALAS2023-2026-3091.txt"
   cve_id: "CVE-2026-82631"
