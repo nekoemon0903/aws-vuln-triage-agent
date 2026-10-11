@@ -127,3 +127,34 @@ def format_case_summary(summary: CaseSummary) -> str:
     )
 
     return f"[{summary.case_id}] Gate: {gate_str} | Accuracy: {acc_str} | Coverage: {cov_str}"
+
+
+if __name__ == "__main__":
+    import sys
+
+    results_base = Path("evals/results")
+    dirs = sorted([d for d in results_base.glob("*") if d.is_dir()])
+
+    if not dirs:
+        print("エラー: evals/results/ 配下に結果ディレクトリが見つかりません。")
+        sys.exit(1)
+
+    latest_dir = dirs[-1]
+
+    if len(sys.argv) > 1:
+        target_input = sys.argv[1]
+    else:
+        user_input = input(
+            f"集計対象ディレクトリを指定 [デフォルト: {latest_dir}]: "
+        ).strip()
+        target_input = user_input if user_input else str(latest_dir)
+
+    target_dir = Path(target_input)
+    if not target_dir.exists():
+        print(f"エラー: 指定ディレクトリ '{target_dir}' が存在しません。")
+        sys.exit(1)
+
+    print(f"\n=== 集計結果サマリー ({target_dir.name}) ===")
+    summaries = summarize_all_cases(target_dir, Path("evals/cases.yaml"))
+    for case_id, summary in sorted(summaries.items()):
+        print(format_case_summary(summary))

@@ -51,3 +51,28 @@
   expected:
     status: "対応不要"
     missing_config_keys: []
+
+- id: "case_006"
+  cell: 3
+  description: "要確認: CVE-2025-66200 の発動条件(allow_override_fileinfo, mod_userdir_enabled, suexec_enabled)がすべて未定義(不足3つ)"
+  profile_path: "stack-profile.cell3-userdir.yaml"
+  alas_path: "ALAS2023-2025-1318.txt"
+  cve_id: "CVE-2025-66200"
+  expected:
+    status: "要確認"
+    missing_config_keys:
+      - "allow_override_fileinfo"
+      - "mod_userdir_enabled"
+      - "suexec_enabled"
+
+- id: "case_007"
+  cell: 3
+  description: "要確認: mod_cgid_enabled: true だが、ssi_enabled および mod_cgi_enabled が未定義(不足2つ)"
+  profile_path: "stack-profile.cell3-cgid.yaml"
+  alas_path: "ALAS2023-2025-1318.txt"
+  cve_id: "CVE-2025-58098"
+  expected:
+    status: "要確認"
+    missing_config_keys:
+      - "ssi_enabled"
+      - "mod_cgi_enabled"
