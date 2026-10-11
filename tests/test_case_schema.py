@@ -72,8 +72,16 @@ def test_status_needs_check_requires_missing_config_keys():
 
 def test_real_cases_yaml_is_valid():
     """検証内容: 本物の evals/cases.yaml がエラーなく全件ロードでき、書き間違いが無いこと"""
-    cases = load_and_validate_cases(Path("evals/cases.yaml"))
-    assert len(cases) == 4
+    cases_path = Path("evals/cases.yaml")
+    cases = load_and_validate_cases(cases_path)
+
+    # YAMLファイル内の "- id:" 行数とロード結果の件数が一致することを確認（インデント崩れ等による消失の検知）
+    raw_content = cases_path.read_text(encoding="utf-8")
+    expected_count = sum(
+        1 for line in raw_content.splitlines() if line.strip().startswith("- id:")
+    )
+
+    assert len(cases) == expected_count
 
 
 def test_invalid_cve_id_not_in_alas(tmp_path):

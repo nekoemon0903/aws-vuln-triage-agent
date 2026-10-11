@@ -20,16 +20,17 @@
     status: "要確認"
     missing_config_keys: ["allow_override_fileinfo"]
 
-# TODO(cell 3): 既存profileでは表現不可(SSI=true かつ不足キー2つ以上のprofileがない)。10月のデータ作成で新規profileを作る
-# - id: "case_003"
-#   cell: 3
-#   description: "要確認: 不足キーが2つ以上(mod_cgid_enabled, allow_override_fileinfo等が未定義)"
-#   profile_path: "stack-profile.example.yaml"
-#   alas_path: "ALAS2023-2025-1318.txt"
-#   cve_id: "CVE-2025-58098"
-#   expected:
-#     status: "要確認"
-#     missing_config_keys: ["mod_cgid_enabled", "allow_override_fileinfo"]
+- id: case_003
+  cell: 3
+  description: "要確認: SSI有効(ssi_enabled: true)だが、mod_cgid_enabled および mod_cgi_enabled が未定義(不足2つ)。※#exec使用は成立と仮定"
+  profile_path: stack-profile.cell3-ssi.yaml
+  alas_path: ALAS2023-2025-1318.txt
+  cve_id: CVE-2025-58098
+  expected:
+    status: 要確認
+    missing_config_keys:
+      - mod_cgid_enabled
+      - mod_cgi_enabled
 
 - id: "case_004"
   cell: 4
