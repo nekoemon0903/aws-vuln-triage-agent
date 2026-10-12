@@ -76,3 +76,25 @@
     missing_config_keys:
       - "ssi_enabled"
       - "mod_cgi_enabled"
+
+- id: "case_008"
+  cell: 2
+  description: "要確認: ssi_enabled: true, mod_cgi_enabled: falseだがmod_cgid_enabledのみ未定義(不足1つ)"
+  profile_path: "stack-profile.cell2-ssi.yaml"
+  alas_path: "ALAS2023-2025-1318.txt"
+  cve_id: "CVE-2025-58098"
+  expected:
+    status: "要確認"
+    missing_config_keys:
+      - "mod_cgid_enabled"
+
+- id: "case_009"
+  cell: 2
+  description: "要確認: allow_override_fileinfo: true, suexec_enabled: trueだがmod_userdir_enabledのみ未定義(不足1つ)"
+  profile_path: "stack-profile.cell2-userdir.yaml"
+  alas_path: "ALAS2023-2025-1318.txt"
+  cve_id: "CVE-2025-66200"
+  expected:
+    status: "要確認"
+    missing_config_keys:
+      - "mod_userdir_enabled"

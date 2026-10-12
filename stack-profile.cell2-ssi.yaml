@@ -1,0 +1,27 @@
+# コンポーネントごとのコンテキスト定義
+components:
+  httpd: # [MEMO] evals セル2用のダミー(case_008)。mod_cgid_enabled を意図的に未記載
+    # 1. 誰に渡すか（出口の受取人）
+    owner: "xxxx@example.com"
+
+    # 2. なぜ存在するのか（ビジネス上の理由 / 止まった際の影響）
+    usage_context: "コーポレートサイトをホストし、事業活動の継続に必要なため"
+
+    # 3. システムの重要度ランク（※脆弱性の緊急度とは別の、システム自体の重要度）
+    criticality: "medium"
+
+    # 4. 現行の構成（APIで取れない、脆弱性発動条件のジャッジに使用する設定）
+    current_configurations:
+      ssi_enabled: true
+      mod_cgi_enabled: false
+      mod_userdir_enabled: false
+      suexec_enabled: false
+      allow_override_fileinfo: false
+
+    # 5. 運用上の制約（SLAやパッチ適用の条件）
+    operational_constraints:
+      - "パッチ適用（サービス再起動）の際は運用側との事前調整が必要"
+
+  valkey: # [MEMO] 2026-10-01 対象全台で rpm -q valkey を実行し、未導入を確認
+    current_configurations:
+      installed: false
