@@ -98,3 +98,23 @@
     status: "要確認"
     missing_config_keys:
       - "mod_userdir_enabled"
+
+- id: "case_010"
+  cell: 4
+  description: "対応不要: ssi_enabled: false, mod_cgid_enabled: false, mod_cgi_enabled: false がすべて明記され、条件が2つ以上否定されている(case_005の対照ペア)"
+  profile_path: "stack-profile.cell4-ssi.yaml"
+  alas_path: "ALAS2023-2025-1318.txt"
+  cve_id: "CVE-2025-58098"
+  expected:
+    status: "対応不要"
+    missing_config_keys: []
+
+- id: "case_011"
+  cell: 4
+  description: "対応不要: allow_override_fileinfo: true, suexec_enabled: true, mod_userdir_enabled: false がすべて明記され、圧縮条件(mod_userdir)で否定(case_009の対照ペア)"
+  profile_path: "stack-profile.cell4-userdir.yaml"
+  alas_path: "ALAS2023-2025-1318.txt"
+  cve_id: "CVE-2025-66200"
+  expected:
+    status: "対応不要"
+    missing_config_keys: []

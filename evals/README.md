@@ -77,8 +77,9 @@ LLMの評価(evals)において、入力側の条件と期待される出力(正
 * **Samba 1895 (CVE-2026-4480)**: 値で否定(`printing`バックエンド等)。※ `%J` に関するキーを足す前提
 * **Nginx 1436 (CVE-2026-1642)**: `false` で否定、明示的な文
 * **OpenSSH 865 (CVE-2025-26465)**: `false` で否定、条件は1つ(基本形)
-* **httpd 1318 (CVE-2025-58098)**: 否定条件が2つ(`ssi_enabled`, `mod_cgid_enabled` ともに `false`。`mod_cgi_enabled` も `false` で全明記)。※既存 case_005 との対照ペア
-* **httpd 1318 (CVE-2025-66200)**: 圧縮された書き方の条件で否定(`mod_userdir_enabled: false`、他は `true`)。※既存 case_009 との対照ペア
+* **httpd 1318 (CVE-2025-58098)**: 否定条件が2つ(`ssi_enabled`, `mod_cgid_enabled` ともに `false`。`mod_cgi_enabled` も `false` で全明記)。※既存 case_005 との対照ペア **【作成済: case_010】**
+* **httpd 1318 (CVE-2025-66200)**: 圧縮された書き方の条件で否定(`mod_userdir_enabled: false`、他は `true`)。※既存 case_009 との対照ペア **【作成済: case_011】**
+* **Valkey 3091 (CVE-2026-82631)**: 未導入(`installed: false`)で確定。 **【作成済: case_004】**
 
 ---
 
@@ -128,3 +129,5 @@ LLMの評価(evals)において、入力側の条件と期待される出力(正
 ## プロファイルで表現できない発動条件の扱い
 
 - `CVE-2025-58098` における「実際に `#exec` ディレクティブを使用しているか」などの条件は、Profileで表現できないため成立しているものと仮定する（遭遇回数: 1回）。
+- `CVE-2025-66200` における「RequestHeaderディレクティブの設定」及び「CGIスクリプトの存在・実行経路(mod_cgi/mod_cgid以外の経路を含む)」は、Profileで表現できないため成立していると仮定する(遭遇回数: 2回)。
+  - ※観測記録: `case_006`(run_4)において、LLMがProfile内の`mod_cgi`/`mod_cgid`が無効であることからCGI実行経路自体が存在しないと否定側に推論し、誤って「対応不要」と判定する危険側の失敗(Gate FAIL)を観測。
