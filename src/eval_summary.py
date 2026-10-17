@@ -87,6 +87,7 @@ def summarize_all_cases(
         cases_yaml_path, base_dir=cases_yaml_path.parent.parent
     )
     summaries: dict[str, CaseSummary] = {}
+    skipped_cases: list[str] = []
 
     for case in cases:
         case_id = case.id
@@ -95,6 +96,13 @@ def summarize_all_cases(
         expected_keys = case.expected.missing_config_keys or []
 
         json_files = sorted(results_dir.glob(f"{case_id}_run_*.json"))
+
+        # 0件の場合は未実行としてスキップ
+        if len(json_files) == 0:
+            skipped_cases.append(case_id)
+            continue
+
+        # 1〜4件、または6件以上は異常としてエラー停止
         if len(json_files) != 5:
             raise ValueError(
                 f"Case {case_id} must have exactly 5 run result files, found {len(json_files)}"
@@ -103,6 +111,9 @@ def summarize_all_cases(
         run_results = [load_case_run_result(f, target_cve) for f in json_files]
         summary = summarize_case_evaluation(expected_status, expected_keys, run_results)
         summaries[case_id] = summary
+
+    if skipped_cases:
+        print(f"未実行ケース(スキップ):{','.join(skipped_cases)}")
 
     return summaries
 

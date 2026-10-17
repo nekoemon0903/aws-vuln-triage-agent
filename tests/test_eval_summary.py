@@ -248,3 +248,132 @@ def test_format_case_summary_output_handles_none_gate():
     output = format_case_summary(summary)
     assert "PASS" not in output
     assert "N/A" in output
+
+
+# 10. 結果0件ケースのスキップ検証
+def test_summarize_all_cases_skips_zero_result_cases(tmp_path: Path):
+    """検証内容: 結果ファイルが0件のケースはエラーにならず除外され、5件揃っているケースのみ集計されること。"""
+    evals_dir = tmp_path / "evals"
+    evals_dir.mkdir()
+    alas_file = tmp_path / "ALAS2023-2025-1318.txt"
+    alas_file.write_text("CVE-1", encoding="utf-8")
+
+    cases_yaml = evals_dir / "cases.yaml"
+    cases_yaml.write_text(
+        f"- id: case_001\n"
+        f"  cell: 1\n"
+        f"  description: dummy1\n"
+        f"  profile_path: stack-profile.yaml\n"
+        f"  alas_path: ALAS2023-2025-1318.txt\n"
+        f"  cve_id: CVE-1\n"
+        f"  expected:\n"
+        f"    status: {Status.NEED_ACTION.value}\n"
+        f"- id: case_002\n"
+        f"  cell: 4\n"
+        f"  description: dummy2\n"
+        f"  profile_path: stack-profile.yaml\n"
+        f"  alas_path: ALAS2023-2025-1318.txt\n"
+        f"  cve_id: CVE-1\n"
+        f"  expected:\n"
+        f"    status: {Status.NOT_NEEDED.value}\n"
+    )
+
+    results_dir = tmp_path / "results"
+    results_dir.mkdir()
+
+    for i in range(1, 6):
+        d = {
+            "case_id": "case_001",
+            "run_index": i,
+            "status": "SUCCESS",
+            "detail": {
+                "cve_results": [{"cve_id": "CVE-1", "status": Status.NEED_ACTION.value}]
+            },
+        }
+        (results_dir / f"case_001_run_{i}.json").write_text(json.dumps(d))
+
+    summaries = summarize_all_cases(results_dir, cases_yaml)
+    assert "case_001" in summaries
+    assert "case_002" not in summaries
+    assert len(summaries) == 1
+
+
+# 11. スキップされたケースIDの出力検証
+def test_summarize_all_cases_prints_skipped_case_ids(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+):
+    """検証内容: 0件でスキップされたケースがある場合、標準出力に未実行ケースIDが出力されること。"""
+    evals_dir = tmp_path / "evals"
+    evals_dir.mkdir()
+    alas_file = tmp_path / "ALAS2023-2025-1318.txt"
+    alas_file.write_text("CVE-1", encoding="utf-8")
+
+    cases_yaml = evals_dir / "cases.yaml"
+    cases_yaml.write_text(
+        f"- id: case_001\n"
+        f"  cell: 1\n"
+        f"  description: dummy1\n"
+        f"  profile_path: stack-profile.yaml\n"
+        f"  alas_path: ALAS2023-2025-1318.txt\n"
+        f"  cve_id: CVE-1\n"
+        f"  expected:\n"
+        f"    status: {Status.NEED_ACTION.value}\n"
+        f"- id: case_002\n"
+        f"  cell: 4\n"
+        f"  description: dummy2\n"
+        f"  profile_path: stack-profile.yaml\n"
+        f"  alas_path: ALAS2023-2025-1318.txt\n"
+        f"  cve_id: CVE-1\n"
+        f"  expected:\n"
+        f"    status: {Status.NOT_NEEDED.value}\n"
+    )
+
+    results_dir = tmp_path / "results"
+    results_dir.mkdir()
+
+    for i in range(1, 6):
+        d = {
+            "case_id": "case_001",
+            "run_index": i,
+            "status": "SUCCESS",
+            "detail": {
+                "cve_results": [{"cve_id": "CVE-1", "status": Status.NEED_ACTION.value}]
+            },
+        }
+        (results_dir / f"case_001_run_{i}.json").write_text(json.dumps(d))
+
+    summarize_all_cases(results_dir, cases_yaml)
+    captured = capsys.readouterr()
+    assert "未実行" in captured.out
+    assert "case_002" in captured.out
+
+
+# 12. 途中脱落(1〜4件)の例外送出を保護する検証
+def test_summarize_all_cases_raises_on_partial_result_cases(tmp_path: Path):
+    """検証内容: 1〜4件しか結果ファイルが存在しないケースは途中脱落としてValueErrorを送出すること。"""
+    evals_dir = tmp_path / "evals"
+    evals_dir.mkdir()
+    alas_file = tmp_path / "ALAS2023-2025-1318.txt"
+    alas_file.write_text("CVE-1", encoding="utf-8")
+
+    cases_yaml = evals_dir / "cases.yaml"
+    cases_yaml.write_text(
+        f"- id: case_001\n"
+        f"  cell: 1\n"
+        f"  description: dummy1\n"
+        f"  profile_path: stack-profile.yaml\n"
+        f"  alas_path: ALAS2023-2025-1318.txt\n"
+        f"  cve_id: CVE-1\n"
+        f"  expected:\n"
+        f"    status: {Status.NEED_ACTION.value}\n"
+    )
+
+    results_dir = tmp_path / "results"
+    results_dir.mkdir()
+
+    # 3件のみ表示
+    for i in range(1, 4):
+        (results_dir / f"case_001_run_{i}.json").write_text("{}", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="must have exactly 5 run result files"):
+        summarize_all_cases(results_dir, cases_yaml)
