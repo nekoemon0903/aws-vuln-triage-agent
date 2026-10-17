@@ -118,3 +118,33 @@
   expected:
     status: "対応不要"
     missing_config_keys: []
+
+- id: "case_012"
+  cell: 4
+  description: "対応不要: verify_host_key_dns_enabled: false で明示的に否定。条件は1つ(基本形)"
+  profile_path: "stack-profile.cell4-openssh.yaml"
+  alas_path: "ALAS2023-2025-865.txt"
+  cve_id: "CVE-2025-26465"
+  expected:
+    status: "対応不要"
+    missing_config_keys: []
+
+- id: "case_013"
+  cell: 4
+  description: "対応不要: proxy_ssl_enabled: false で明示的に否定。ALAS の本文に条件が明示された形(when configured to proxy to upstream TLS servers)"
+  profile_path: "stack-profile.cell4-nginx.yaml"
+  alas_path: "ALAS2023-2026-1436.txt"
+  cve_id: "CVE-2026-1642"
+  expected:
+    status: "対応不要"
+    missing_config_keys: []
+
+- id: "case_014"
+  cell: 4
+  description: "対応不要: printing: 'cups'(値/文字列挙値)で否定。print_command_has_percent_j: trueと合わせて条件キーを2つとも完備"
+  profile_path: "stack-profile.cell4-samba.yaml"
+  alas_path: "ALAS2023-2026-1895.txt"
+  cve_id: "CVE-2026-4480"
+  expected:
+    status: "対応不要"
+    missing_config_keys: []

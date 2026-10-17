@@ -1,0 +1,69 @@
+Amazon Linux Security Center
+Amazon Linux 2027 Preview
+Amazon Linux 2023
+Amazon Linux 2 (EOS)
+Amazon Linux 1 (EOL)
+Explore CVEs
+Announcements
+FAQs
+ALAS2023-2025-865
+Amazon Linux 2023 Security Advisory: ALAS2023-2025-865
+Advisory Released Date: 2025-03-06
+Advisory Updated Date: 2025-03-06
+Severity:  Medium
+References: CVE-2025-26465
+FAQs regarding Amazon Linux ALAS/CVE Severity
+Issue Overview:
+A vulnerability was found in OpenSSH when the VerifyHostKeyDNS option is enabled. A machine-in-the-middle attack can be performed by a malicious machine impersonating a legit server. This issue occurs due to how OpenSSH mishandles error codes in specific conditions when verifying the host key. For an attack to be considered successful, the attacker needs to manage to exhaust the client's memory resource first, turning the attack complexity high. (CVE-2025-26465)
+
+
+Affected Packages:
+openssh
+
+
+Issue Correction:
+Run dnf update openssh --releasever 2023.6.20250303 or dnf update --advisory ALAS2023-2025-865 --releasever 2023.6.20250303 to update your system.
+More information on how to update your system can be found on this page: Amazon Linux 2023 documentation
+
+New Packages:
+aarch64:
+    openssh-clients-debuginfo-8.7p1-8.amzn2023.0.14.aarch64
+    pam_ssh_agent_auth-debuginfo-0.10.4-4.8.amzn2023.0.14.aarch64
+    openssh-debuginfo-8.7p1-8.amzn2023.0.14.aarch64
+    openssh-keycat-debuginfo-8.7p1-8.amzn2023.0.14.aarch64
+    openssh-server-8.7p1-8.amzn2023.0.14.aarch64
+    openssh-server-debuginfo-8.7p1-8.amzn2023.0.14.aarch64
+    openssh-debugsource-8.7p1-8.amzn2023.0.14.aarch64
+    openssh-8.7p1-8.amzn2023.0.14.aarch64
+    openssh-keycat-8.7p1-8.amzn2023.0.14.aarch64
+    pam_ssh_agent_auth-0.10.4-4.8.amzn2023.0.14.aarch64
+    openssh-clients-8.7p1-8.amzn2023.0.14.aarch64
+
+src:
+    openssh-8.7p1-8.amzn2023.0.14.src
+
+x86_64:
+    openssh-clients-debuginfo-8.7p1-8.amzn2023.0.14.x86_64
+    openssh-keycat-8.7p1-8.amzn2023.0.14.x86_64
+    pam_ssh_agent_auth-debuginfo-0.10.4-4.8.amzn2023.0.14.x86_64
+    openssh-server-debuginfo-8.7p1-8.amzn2023.0.14.x86_64
+    openssh-8.7p1-8.amzn2023.0.14.x86_64
+    pam_ssh_agent_auth-0.10.4-4.8.amzn2023.0.14.x86_64
+    openssh-keycat-debuginfo-8.7p1-8.amzn2023.0.14.x86_64
+    openssh-debuginfo-8.7p1-8.amzn2023.0.14.x86_64
+    openssh-server-8.7p1-8.amzn2023.0.14.x86_64
+    openssh-clients-8.7p1-8.amzn2023.0.14.x86_64
+    openssh-debugsource-8.7p1-8.amzn2023.0.14.x86_64
+
+Additional References
+Release Notes:  Amazon Linux 2023 Release Notes
+
+Red Hat: CVE-2025-26465
+
+Mitre: CVE-2025-26465
+
+CVE description copyright © 2023 The MITRE Corporation
+
+CVE description copyright © 2023 Red Hat, Inc. Per https://access.redhat.com/security/data, RedHat's CVE report is licensed under CC BY 4.0.
+
+Privacy | Site terms apply, and downloading this site or portions of it is permitted | Cookie preferences | © 2023, Amazon Web Services, Inc. or its affiliates. All rights reserved.

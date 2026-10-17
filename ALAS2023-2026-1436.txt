@@ -1,0 +1,83 @@
+Amazon Linux Security Center
+Amazon Linux 2027 Preview
+Amazon Linux 2023
+Amazon Linux 2 (EOS)
+Amazon Linux 1 (EOL)
+Explore CVEs
+Announcements
+FAQs
+ALAS2023-2026-1436
+Amazon Linux 2023 Security Advisory: ALAS2023-2026-1436
+Advisory Released Date: 2026-02-18
+Advisory Updated Date: 2026-02-18
+Severity:  Medium
+References: CVE-2026-1642
+FAQs regarding Amazon Linux ALAS/CVE Severity
+Issue Overview:
+A vulnerability exists in NGINX OSS and NGINX Plus when configured to proxy to upstream Transport Layer Security (TLS) servers. An attacker with a man-in-the-middle (MITM) position on the upstream server side--along with conditions beyond the attacker's control--may be able to inject plain text data into the response from an upstream proxied server. Note: Software versions which have reached End of Technical Support (EoTS) are not evaluated. (CVE-2026-1642)
+
+
+Affected Packages:
+nginx
+
+
+Issue Correction:
+Run dnf update nginx --releasever 2023.10.20260216 or dnf update --advisory ALAS2023-2026-1436 --releasever 2023.10.20260216 to update your system.
+More information on how to update your system can be found on this page: Amazon Linux 2023 documentation
+
+New Packages:
+aarch64:
+    nginx-mod-http-image-filter-debuginfo-1.28.2-1.amzn2023.0.1.aarch64
+    nginx-core-debuginfo-1.28.2-1.amzn2023.0.1.aarch64
+    nginx-mod-http-perl-1.28.2-1.amzn2023.0.1.aarch64
+    nginx-mod-mail-debuginfo-1.28.2-1.amzn2023.0.1.aarch64
+    nginx-mod-http-xslt-filter-1.28.2-1.amzn2023.0.1.aarch64
+    nginx-mod-stream-1.28.2-1.amzn2023.0.1.aarch64
+    nginx-debuginfo-1.28.2-1.amzn2023.0.1.aarch64
+    nginx-mod-mail-1.28.2-1.amzn2023.0.1.aarch64
+    nginx-mod-http-image-filter-1.28.2-1.amzn2023.0.1.aarch64
+    nginx-mod-http-perl-debuginfo-1.28.2-1.amzn2023.0.1.aarch64
+    nginx-mod-stream-debuginfo-1.28.2-1.amzn2023.0.1.aarch64
+    nginx-debugsource-1.28.2-1.amzn2023.0.1.aarch64
+    nginx-1.28.2-1.amzn2023.0.1.aarch64
+    nginx-mod-devel-1.28.2-1.amzn2023.0.1.aarch64
+    nginx-mod-http-xslt-filter-debuginfo-1.28.2-1.amzn2023.0.1.aarch64
+    nginx-core-1.28.2-1.amzn2023.0.1.aarch64
+
+noarch:
+    nginx-all-modules-1.28.2-1.amzn2023.0.1.noarch
+    nginx-filesystem-1.28.2-1.amzn2023.0.1.noarch
+
+src:
+    nginx-1.28.2-1.amzn2023.0.1.src
+
+x86_64:
+    nginx-1.28.2-1.amzn2023.0.1.x86_64
+    nginx-mod-http-perl-debuginfo-1.28.2-1.amzn2023.0.1.x86_64
+    nginx-mod-stream-debuginfo-1.28.2-1.amzn2023.0.1.x86_64
+    nginx-mod-http-image-filter-debuginfo-1.28.2-1.amzn2023.0.1.x86_64
+    nginx-core-debuginfo-1.28.2-1.amzn2023.0.1.x86_64
+    nginx-debugsource-1.28.2-1.amzn2023.0.1.x86_64
+    nginx-mod-http-perl-1.28.2-1.amzn2023.0.1.x86_64
+    nginx-debuginfo-1.28.2-1.amzn2023.0.1.x86_64
+    nginx-mod-http-xslt-filter-debuginfo-1.28.2-1.amzn2023.0.1.x86_64
+    nginx-mod-mail-debuginfo-1.28.2-1.amzn2023.0.1.x86_64
+    nginx-core-1.28.2-1.amzn2023.0.1.x86_64
+    nginx-mod-stream-1.28.2-1.amzn2023.0.1.x86_64
+    nginx-mod-http-xslt-filter-1.28.2-1.amzn2023.0.1.x86_64
+    nginx-mod-mail-1.28.2-1.amzn2023.0.1.x86_64
+    nginx-mod-http-image-filter-1.28.2-1.amzn2023.0.1.x86_64
+    nginx-mod-devel-1.28.2-1.amzn2023.0.1.x86_64
+
+Additional References
+Release Notes:  Amazon Linux 2023 Release Notes
+
+Red Hat: CVE-2026-1642
+
+Mitre: CVE-2026-1642
+
+CVE description copyright © 2023 The MITRE Corporation
+
+CVE description copyright © 2023 Red Hat, Inc. Per https://access.redhat.com/security/data, RedHat's CVE report is licensed under CC BY 4.0.
+
+Privacy | Site terms apply, and downloading this site or portions of it is permitted | Cookie preferences | © 2023, Amazon Web Services, Inc. or its affiliates. All rights reserved.

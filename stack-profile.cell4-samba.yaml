@@ -1,0 +1,13 @@
+# コンポーネントごとのコンテキスト定義
+# [MEMO] evals セル4用のダミー(case_014)printing: "cups", print_command_has_percent_j: true を明示的に指定して発動条件に関わるキーを2つとも揃えた状態として定義する
+components:
+  samba:
+    owner: "xxxx@example.com"
+    usage_context: "社内Windows端末とのファイル共有およびプリンタ共有サービスを提供するため"
+    criticality: "medium"
+    current_configurations:
+      installed: true
+      printing: "cups"
+      print_command_has_percent_j: true
+    operational_constraints:
+      - "パッチ適用（サービス再起動）の際は運用側との事前調整が必要"

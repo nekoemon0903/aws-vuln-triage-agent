@@ -1,0 +1,12 @@
+# コンポーネントごとのコンテキスト定義
+# [MEMO] evals セル4用のダミー(case_012)verify_host_key_dns_enabled を明示的に指定
+components:
+  openssh:
+    owner: "xxxx@example.com"
+    usage_context: "他システムへのバッチ連携やメンテナンスにおいて、このホストから外部へSSH接続する用途があるため"
+    criticality: "medium"
+    current_configurations:
+      installed: true
+      verify_host_key_dns_enabled: false
+    operational_constraints:
+      - "パッチ適用（サービス再起動）の際は運用側との事前調整が必要"

@@ -1,0 +1,202 @@
+Amazon Linux Security Center
+Amazon Linux 2027 Preview
+Amazon Linux 2023
+Amazon Linux 2 (EOS)
+Amazon Linux 1 (EOL)
+Explore CVEs
+Announcements
+FAQs
+ALAS2023-2026-1895
+Amazon Linux 2023 Security Advisory: ALAS2023-2026-1895
+Advisory Released Date: 2026-06-22
+Advisory Updated Date: 2026-06-22
+Severity:  Important
+References: CVE-2026-3238  CVE-2026-4408  CVE-2026-4480
+FAQs regarding Amazon Linux ALAS/CVE Severity
+Issue Overview:
+unauthenticated udp packet crashes AD DC nbt server (CVE-2026-3238)
+
+Samba file servers and classic (non-AD) domain controllers offer the
+SamValidatePasswordChange and SamValidatePasswordReset RPC services on the
+SAMR DCE/RPC service when running over NCACN_IP_TCP. Both services pass a
+username and password to the "check password script" that can be configured
+in smb.conf.
+
+If the "check password script" is configured with the %u
+substitution character, the client-controlled username is passed to
+the "check password script" without escaping shell meta-characters,
+leading to a remote command execution vulnerability.
+
+This is a non-standard configuration in several ways:
+
+It affects Samba file servers and classic (non-AD) domain controllers
+that have the "check password script" configured with the %u
+substitution character. Active Directory Domain Controllers are not
+affected, they do not expand the username via the %u substitution
+character.
+
+The problem is much less dangerous if %u has single quotes directly
+around it, e.g. '%u', but it's still possible to inject
+command line options.
+
+Standard Samba file servers and classic domain controllers are also
+only affected if the samba-dcerpcd service is started as a system
+service, which can only happen if "rpc start on demand helpers" is set
+to the non-default setting "no". In the default configuration for
+DCE/RPC, smbd starts the samba-dcerpcd in a way that makes the
+vulnerable code inaccessible. (CVE-2026-4408)
+
+Samba passes the client-controlled job description string to the
+command configured with the "print command" setting via the "%J"
+substitution character without escaping shell meta characters. This
+leads to a remote code execution vulnerability.
+
+Print servers configured with "printing = cups" or "printing =
+iprint", and print servers that do not have the %J substitution
+character in the "print command" setting are not affected.
+
+The problem is much less dangerous if %J has single quotes directly
+around it, e.g. '%J', but it's still possible to inject
+command line options.
+
+By default, print servers allow guest users to print. (CVE-2026-4480)
+
+
+Affected Packages:
+samba
+
+
+Issue Correction:
+Run dnf update samba --releasever 2023.12.20260622 or dnf update --advisory ALAS2023-2026-1895 --releasever 2023.12.20260622 to update your system.
+More information on how to update your system can be found on this page: Amazon Linux 2023 documentation
+
+New Packages:
+aarch64:
+    samba-test-debuginfo-4.17.12-1.amzn2023.0.4.aarch64
+    samba-krb5-printing-debuginfo-4.17.12-1.amzn2023.0.4.aarch64
+    samba-dc-libs-debuginfo-4.17.12-1.amzn2023.0.4.aarch64
+    samba-vfs-iouring-debuginfo-4.17.12-1.amzn2023.0.4.aarch64
+    samba-winbind-debuginfo-4.17.12-1.amzn2023.0.4.aarch64
+    samba-common-libs-4.17.12-1.amzn2023.0.4.aarch64
+    samba-vfs-iouring-4.17.12-1.amzn2023.0.4.aarch64
+    samba-winbind-krb5-locator-4.17.12-1.amzn2023.0.4.aarch64
+    python3-samba-dc-4.17.12-1.amzn2023.0.4.aarch64
+    samba-common-tools-debuginfo-4.17.12-1.amzn2023.0.4.aarch64
+    libwbclient-debuginfo-4.17.12-1.amzn2023.0.4.aarch64
+    samba-common-libs-debuginfo-4.17.12-1.amzn2023.0.4.aarch64
+    samba-common-tools-4.17.12-1.amzn2023.0.4.aarch64
+    samba-test-4.17.12-1.amzn2023.0.4.aarch64
+    samba-client-4.17.12-1.amzn2023.0.4.aarch64
+    samba-client-libs-debuginfo-4.17.12-1.amzn2023.0.4.aarch64
+    samba-debugsource-4.17.12-1.amzn2023.0.4.aarch64
+    libnetapi-debuginfo-4.17.12-1.amzn2023.0.4.aarch64
+    samba-test-libs-debuginfo-4.17.12-1.amzn2023.0.4.aarch64
+    libsmbclient-4.17.12-1.amzn2023.0.4.aarch64
+    samba-winbind-4.17.12-1.amzn2023.0.4.aarch64
+    libwbclient-devel-4.17.12-1.amzn2023.0.4.aarch64
+    python3-samba-test-4.17.12-1.amzn2023.0.4.aarch64
+    samba-ldb-ldap-modules-4.17.12-1.amzn2023.0.4.aarch64
+    samba-devel-4.17.12-1.amzn2023.0.4.aarch64
+    samba-dcerpc-4.17.12-1.amzn2023.0.4.aarch64
+    python3-samba-devel-4.17.12-1.amzn2023.0.4.aarch64
+    samba-winbind-clients-debuginfo-4.17.12-1.amzn2023.0.4.aarch64
+    samba-client-libs-4.17.12-1.amzn2023.0.4.aarch64
+    samba-ldb-ldap-modules-debuginfo-4.17.12-1.amzn2023.0.4.aarch64
+    samba-winbind-modules-debuginfo-4.17.12-1.amzn2023.0.4.aarch64
+    samba-dc-libs-4.17.12-1.amzn2023.0.4.aarch64
+    samba-krb5-printing-4.17.12-1.amzn2023.0.4.aarch64
+    libwbclient-4.17.12-1.amzn2023.0.4.aarch64
+    python3-samba-4.17.12-1.amzn2023.0.4.aarch64
+    samba-winbind-krb5-locator-debuginfo-4.17.12-1.amzn2023.0.4.aarch64
+    python3-samba-debuginfo-4.17.12-1.amzn2023.0.4.aarch64
+    libnetapi-devel-4.17.12-1.amzn2023.0.4.aarch64
+    samba-client-debuginfo-4.17.12-1.amzn2023.0.4.aarch64
+    samba-libs-debuginfo-4.17.12-1.amzn2023.0.4.aarch64
+    samba-test-libs-4.17.12-1.amzn2023.0.4.aarch64
+    libnetapi-4.17.12-1.amzn2023.0.4.aarch64
+    python3-samba-dc-debuginfo-4.17.12-1.amzn2023.0.4.aarch64
+    samba-libs-4.17.12-1.amzn2023.0.4.aarch64
+    samba-dcerpc-debuginfo-4.17.12-1.amzn2023.0.4.aarch64
+    samba-tools-4.17.12-1.amzn2023.0.4.aarch64
+    samba-winbind-modules-4.17.12-1.amzn2023.0.4.aarch64
+    samba-debuginfo-4.17.12-1.amzn2023.0.4.aarch64
+    samba-4.17.12-1.amzn2023.0.4.aarch64
+    libsmbclient-devel-4.17.12-1.amzn2023.0.4.aarch64
+    samba-usershares-4.17.12-1.amzn2023.0.4.aarch64
+    samba-winbind-clients-4.17.12-1.amzn2023.0.4.aarch64
+    libsmbclient-debuginfo-4.17.12-1.amzn2023.0.4.aarch64
+
+noarch:
+    samba-common-4.17.12-1.amzn2023.0.4.noarch
+    samba-pidl-4.17.12-1.amzn2023.0.4.noarch
+
+src:
+    samba-4.17.12-1.amzn2023.0.4.src
+
+x86_64:
+    samba-test-debuginfo-4.17.12-1.amzn2023.0.4.x86_64
+    samba-dcerpc-debuginfo-4.17.12-1.amzn2023.0.4.x86_64
+    samba-client-debuginfo-4.17.12-1.amzn2023.0.4.x86_64
+    samba-libs-debuginfo-4.17.12-1.amzn2023.0.4.x86_64
+    samba-winbind-debuginfo-4.17.12-1.amzn2023.0.4.x86_64
+    samba-debuginfo-4.17.12-1.amzn2023.0.4.x86_64
+    samba-devel-4.17.12-1.amzn2023.0.4.x86_64
+    samba-client-libs-debuginfo-4.17.12-1.amzn2023.0.4.x86_64
+    python3-samba-test-4.17.12-1.amzn2023.0.4.x86_64
+    python3-samba-devel-4.17.12-1.amzn2023.0.4.x86_64
+    samba-winbind-modules-debuginfo-4.17.12-1.amzn2023.0.4.x86_64
+    samba-debugsource-4.17.12-1.amzn2023.0.4.x86_64
+    samba-krb5-printing-debuginfo-4.17.12-1.amzn2023.0.4.x86_64
+    samba-winbind-krb5-locator-4.17.12-1.amzn2023.0.4.x86_64
+    libwbclient-devel-4.17.12-1.amzn2023.0.4.x86_64
+    libwbclient-debuginfo-4.17.12-1.amzn2023.0.4.x86_64
+    libnetapi-devel-4.17.12-1.amzn2023.0.4.x86_64
+    samba-usershares-4.17.12-1.amzn2023.0.4.x86_64
+    samba-ldb-ldap-modules-debuginfo-4.17.12-1.amzn2023.0.4.x86_64
+    python3-samba-dc-4.17.12-1.amzn2023.0.4.x86_64
+    python3-samba-dc-debuginfo-4.17.12-1.amzn2023.0.4.x86_64
+    samba-client-4.17.12-1.amzn2023.0.4.x86_64
+    samba-krb5-printing-4.17.12-1.amzn2023.0.4.x86_64
+    libnetapi-debuginfo-4.17.12-1.amzn2023.0.4.x86_64
+    samba-tools-4.17.12-1.amzn2023.0.4.x86_64
+    samba-test-4.17.12-1.amzn2023.0.4.x86_64
+    python3-samba-debuginfo-4.17.12-1.amzn2023.0.4.x86_64
+    samba-winbind-clients-debuginfo-4.17.12-1.amzn2023.0.4.x86_64
+    samba-vfs-iouring-debuginfo-4.17.12-1.amzn2023.0.4.x86_64
+    libsmbclient-debuginfo-4.17.12-1.amzn2023.0.4.x86_64
+    samba-common-libs-debuginfo-4.17.12-1.amzn2023.0.4.x86_64
+    samba-test-libs-4.17.12-1.amzn2023.0.4.x86_64
+    samba-test-libs-debuginfo-4.17.12-1.amzn2023.0.4.x86_64
+    samba-dc-libs-debuginfo-4.17.12-1.amzn2023.0.4.x86_64
+    python3-samba-4.17.12-1.amzn2023.0.4.x86_64
+    samba-common-tools-debuginfo-4.17.12-1.amzn2023.0.4.x86_64
+    libsmbclient-devel-4.17.12-1.amzn2023.0.4.x86_64
+    samba-vfs-iouring-4.17.12-1.amzn2023.0.4.x86_64
+    libsmbclient-4.17.12-1.amzn2023.0.4.x86_64
+    libwbclient-4.17.12-1.amzn2023.0.4.x86_64
+    samba-winbind-4.17.12-1.amzn2023.0.4.x86_64
+    samba-winbind-krb5-locator-debuginfo-4.17.12-1.amzn2023.0.4.x86_64
+    samba-common-libs-4.17.12-1.amzn2023.0.4.x86_64
+    samba-ldb-ldap-modules-4.17.12-1.amzn2023.0.4.x86_64
+    samba-winbind-clients-4.17.12-1.amzn2023.0.4.x86_64
+    samba-winbind-modules-4.17.12-1.amzn2023.0.4.x86_64
+    libnetapi-4.17.12-1.amzn2023.0.4.x86_64
+    samba-4.17.12-1.amzn2023.0.4.x86_64
+    samba-dc-libs-4.17.12-1.amzn2023.0.4.x86_64
+    samba-common-tools-4.17.12-1.amzn2023.0.4.x86_64
+    samba-libs-4.17.12-1.amzn2023.0.4.x86_64
+    samba-dcerpc-4.17.12-1.amzn2023.0.4.x86_64
+    samba-client-libs-4.17.12-1.amzn2023.0.4.x86_64
+
+Additional References
+Release Notes:  Amazon Linux 2023 Release Notes
+
+Red Hat: CVE-2026-3238, CVE-2026-4408, CVE-2026-4480
+
+Mitre: CVE-2026-3238, CVE-2026-4408, CVE-2026-4480
+
+CVE description copyright © 2023 The MITRE Corporation
+
+CVE description copyright © 2023 Red Hat, Inc. Per https://access.redhat.com/security/data, RedHat's CVE report is licensed under CC BY 4.0.
+
+Privacy | Site terms apply, and downloading this site or portions of it is permitted | Cookie preferences | © 2023, Amazon Web Services, Inc. or its affiliates. All rights reserved.
