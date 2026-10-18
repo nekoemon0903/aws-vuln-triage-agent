@@ -1,0 +1,15 @@
+# コンポーネントごとのコンテキスト定義
+# [MEMO] evalsセル4用のダミー(case_018)CGIは有効だが、環境変数設定を否定(圧縮条件のテスト)
+# [MEMO] setenv_configured: falseは、SetEnv, PassEnv, SetEnvIf などによる明示的な環境変数付与を行っていないことを意味する
+components:
+  httpd:
+    owner: "xxx@example.com"
+    usage_context: "社内ポータル及びレガシーCGIツールの稼働環境"
+    criticality: "high"
+    current_configurations:
+      installed: true
+      mod_cgi_enabled: true
+      mod_cgid_enabled: false
+      setenv_configured: false
+    operational_constraints:
+      - "基盤パッケージ更新時はメンテナンス通知が必要"

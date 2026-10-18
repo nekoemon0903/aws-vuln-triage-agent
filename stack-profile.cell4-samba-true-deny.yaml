@@ -1,0 +1,14 @@
+# コンポーネントごとのコンテキスト定義
+# [MEMO] evalsセル4用のダミー(case_017) trueが否定側になるケース
+components:
+  samba:
+    owner: "xxx@example.com"
+    usage_context: "社内LAN向けファイル共有用途"
+    criticality: "medium"
+    current_configurations:
+      installed: true
+      server_role: "standalone" # AD DC ではないことを明示（条件1は成立）
+      rpc_start_on_demand_helpers: true
+      check_password_script_has_percent_u: true
+    operational_constraints:
+      - "夜間のメンテナンスウィンドウ内でのみ再起動可能"

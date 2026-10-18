@@ -148,3 +148,43 @@
   expected:
     status: "対応不要"
     missing_config_keys: []
+
+- id: "case_015"
+  cell: 4
+  description: "対応不要: nginx未導入(installed: false)。設定キーがなくてもinstalled: falseのみでセル4となる境界(α)の確認"
+  profile_path: "stack-profile.cell4-nginx-uninstalled.yaml"
+  alas_path: "ALAS2023-2026-1436.txt"
+  cve_id: "CVE-2026-1642"
+  expected:
+    status: "対応不要"
+    missing_config_keys: []
+
+- id: "case_016"
+  cell: 4
+  description: "対応不要: printingが'cups'(値で否定)、かつprint_command_has_percent_jがfalseの2つの条件で否定(case_014の対照ペア)"
+  profile_path: "stack-profile.cell4-samba-multi-deny.yaml"
+  alas_path: "ALAS2023-2026-1895.txt"
+  cve_id: "CVE-2026-4480"
+  expected:
+    status: "対応不要"
+    missing_config_keys: []
+
+- id: "case_017"
+  cell: 4
+  description: "対応不要: rpc_start_on_demand_helpers: true(既定値)で否定。trueが否定側となる条件のテスト"
+  profile_path: "stack-profile.cell4-samba-true-deny.yaml"
+  alas_path: "ALAS2023-2026-1895.txt"
+  cve_id: "CVE-2026-4408"
+  expected:
+    status: "対応不要"
+    missing_config_keys: []
+
+- id: "case_018"
+  cell: 4
+  description: "対応不要: mod_cgi_enabled: true(CGI有効)だが、setenv_configured: falseで否定。圧縮された条件(設定ファイル経由の環境変数付与)を否定するパターン"
+  profile_path: "stack-profile.cell4-httpd-env.yaml"
+  alas_path: "ALAS2023-2025-1318.txt"
+  cve_id: "CVE-2025-65082"
+  expected:
+    status: "対応不要"
+    missing_config_keys: []

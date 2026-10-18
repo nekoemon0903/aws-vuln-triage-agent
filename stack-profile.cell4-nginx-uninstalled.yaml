@@ -1,0 +1,11 @@
+# コンポーネントごとのコンテキスト定義
+# [MEMO] evals セル4用のダミー(case_015)installed: falseのみで設定キーを持たない(境界(α)検証用)
+components:
+  nginx:
+    owner: "xxxx@example.com"
+    usage_context: "xxx@example.com"
+    criticality: "low"
+    current_configurations:
+      installed: false
+    operational_constraints:
+      - "特になし"

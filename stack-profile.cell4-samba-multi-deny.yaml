@@ -1,0 +1,13 @@
+# コンポーネントごとのコンテキスト定義
+# [MEMO] evalsセル4用のダミー(case_016) printing: cups と print_command_has_percent_j: false の2つで否定
+components:
+  samba:
+    owner: "xxx@example.com"
+    usage_context: "社内のファイル共有及びCUPS連携によるプリントサーバーとして利用"
+    criticality: "medium"
+    current_configurations:
+      installed: true
+      printing: "cups"
+      print_command_has_percent_j: false
+    operational_constraints:
+      - "パッチ適用時はファイル共有サービスへの影響を考慮して夜間作業とする"
