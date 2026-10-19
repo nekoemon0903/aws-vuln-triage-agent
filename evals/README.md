@@ -107,17 +107,21 @@ LLMの評価(evals)において、入力側の条件と期待される出力(正
 | ケースID | 既定値の向き | 対象CVE | 欠けさせるキー | 否定する条件 | 崩れの数 | 書かれ方 | 状態 |
 |:---|:---|:---|:---|:---|:---|:---|:---|
 | case_005 | 環境依存 | httpd 58098 | mod_cgi_enabled | ssi_enabled: false + mod_cgid_enabled: false | 2 | 圧縮 | **作成済** |
-| case_019 | 成立側 | httpd 58098 | mod_cgid_enabled | ssi_enabled: false | 1 | 圧縮 | 未作成 |
-| case_020 | 成立側 | httpd 58098 | mod_cgid_enabled | ssi_enabled: false + mod_cgi_enabled: true | 2 | 圧縮 | 未作成 |
-| case_021 | 成立側 | samba 4408 | server_role | rpc_start_on_demand_helpers: true | 1 | 明示 | 未作成 |
-| case_022 | 成立側 | samba 4408 | server_role | rpc_start_on_demand_helpers: true + check_password_script_has_percent_u: false | 2 | 明示 | 未作成 |
+| case_019 | 成立側 | httpd 58098 | mod_cgid_enabled | ssi_enabled: false | 1 | 圧縮 | **作成済** |
+| case_020 | 成立側(※注) | httpd 58098 | mod_cgid_enabled | ssi_enabled: false + mod_cgi_enabled: true | 2 | 圧縮 | **作成済** |
+| case_021 | 成立側 | samba 4408 | server_role | rpc_start_on_demand_helpers: true | 1 | 明示 | **作成済** |
+| case_022 | 成立側 | samba 4408 | server_role | rpc_start_on_demand_helpers: true + check_password_script_has_percent_u: false | 2 | 明示 | **作成済** |
 | case_023 | 環境依存 | httpd 66200 | suexec_enabled | mod_userdir_enabled: false | 1 | 圧縮 | 未作成 |
 | case_024 | 環境依存 | valkey 86227 | dump.rdbの改ざん | cluster_enabled: false | 1 | 明示 | 未作成 |
 | case_025 | 環境依存 | httpd 65082 | CGIのキー(cgi/cgidとも) | setenv_configured: false | 1 | 圧縮 | 未作成 |
 | case_026 | 不成立側 | samba 4480 | print_command_has_percent_j | printing: "cups" | 1 | 明示 | 未作成 |
 | case_027 | 不成立側 | httpd 66200 | allow_override_fileinfo | mod_userdir_enabled: false | 1 | 圧縮 | 未作成 |
 
-※既定値の向きは推定で未確認です。ケース作成時に公式ドキュメントで確認します。
+※注: cgidの既定はMPMによって決まる(上流の01-cgi.confで確認)。case_020のprofile(mod_cgi_enabled: true)はpreforkを示すため、実質は不成立側。配分(4/4/2)を見直すかは2026-11-01に判断する。
+※既定値の向きの確認状況:
+  - samba: 公式のsmb.conf(5)で確認済み(auto → standalone)
+  - httpd: 上流(CentOS Stream 10)の設定で確認済み(AL2023実機は未確認)
+  - その他: 推定で未確認。ケース作成時に確認する。
 
 ---
 
