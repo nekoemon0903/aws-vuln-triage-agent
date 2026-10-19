@@ -1,0 +1,13 @@
+# コンポーネントごとのコンテキスト定義
+# [MEMO] evals セル5用のダミー(case_021)。server_roleが未定義(成立側: standalone)だが、rpc_start_on_demand_helpers: trueで否定(崩れ1)。
+components:
+  samba:
+    owner: "xxx@example.com"
+    usage_context: "社内ファイル共有サーバー"
+    criticality: "medium"
+    current_configurations:
+      installed: true
+      check_password_script_has_percent_u: true
+      rpc_start_on_demand_helpers: true
+    operational_constraints:
+      - "夜間バッチ処理時間帯の再起動は避けること"

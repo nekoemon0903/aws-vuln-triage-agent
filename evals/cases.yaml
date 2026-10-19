@@ -188,3 +188,43 @@
   expected:
     status: "対応不要"
     missing_config_keys: []
+
+- id: "case_019"
+  cell: 5
+  description: "対応不要: mod_cgid_enabledが未定義(成立側の既定値)だが、ssi_enabled: falseで否定(崩れ1)。既定値で推測補完しても対応不要に倒れるパターン"
+  profile_path: "stack-profile.cell5-httpd-019.yaml"
+  alas_path: "ALAS2023-2025-1318.txt"
+  cve_id: "CVE-2025-58098"
+  expected:
+    status: "対応不要"
+    missing_config_keys: []
+
+- id: "case_020"
+  cell: 5
+  description: "対応不要: mod_cgid_enabledが未定義(成立側の既定値)だが、ssi_enabled: falseとmod_cgi_enabled: trueで否定(崩れ2)。圧縮表現(but not mod_cgi)への違反を含む"
+  profile_path: "stack-profile.cell5-httpd-020.yaml"
+  alas_path: "ALAS2023-2025-1318.txt"
+  cve_id: "CVE-2025-58098"
+  expected:
+    status: "対応不要"
+    missing_config_keys: []
+
+- id: "case_021"
+  cell: 5
+  description: "対応不要: server_roleが未定義(成立側: standalone)だが、rpc_start_on_demand_helpers: trueで否定(崩れ1)。既定値で推測補完しても対応不要に倒れるパターン"
+  profile_path: "stack-profile.cell5-samba-021.yaml"
+  alas_path: "ALAS2023-2026-1895.txt"
+  cve_id: "CVE-2026-4408"
+  expected:
+    status: "対応不要"
+    missing_config_keys: []
+
+- id: "case_022"
+  cell: 5
+  description: "対応不要: server_roleが未定義(成立側)だが、rpc_start_on_demand_helpers: trueとcheck_password_script_has_percent_u: falseで否定(崩れ2)"
+  profile_path: "stack-profile.cell5-samba-022.yaml"
+  alas_path: "ALAS2023-2026-1895.txt"
+  cve_id: "CVE-2026-4408"
+  expected:
+    status: "対応不要"
+    missing_config_keys: []

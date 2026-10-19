@@ -1,0 +1,13 @@
+# コンポーネントごとのコンテキスト定義
+# [MEMO] evals セル5用のダミー(case_020)mod_cgid_enabledが未定義(成立側の既定値)だが、ssi_enabled: false と mod_cgi_enabled: true で否定(崩れ2)。
+components:
+  httpd:
+    owner: "xxx@example.com"
+    usage_context: "静的コンテンツおよびWebアプリケーションの配信"
+    criticality: "high"
+    current_configurations:
+      installed: true
+      ssi_enabled: false
+      mod_cgi_enabled: true
+    operational_constraints:
+      - "設定変更時はステージング環境での事前テストが必須"
