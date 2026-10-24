@@ -228,3 +228,23 @@
   expected:
     status: "対応不要"
     missing_config_keys: []
+
+- id: "case_026"
+  cell: 5
+  description: "対応不要: print_command_has_percent_jが未定義(不成立側)だが、printing: 'cups'で否定(崩れ1)。既定値で推測補完しても対応不要に倒れるパターン"
+  profile_path: "stack-profile.cell5-samba-026.yaml"
+  alas_path: "ALAS2023-2026-1895.txt"
+  cve_id: "CVE-2026-4480"
+  expected:
+    status: "対応不要"
+    missing_config_keys: []
+
+- id: "case_027"
+  cell: 5
+  description: "対応不要: allow_override_fileinfoが未定義(不成立側)だが、mod_userdir_enabled: falseで否定(崩れ1)。圧縮条件で否定され既定値補完でも対応不要に倒れるパターン"
+  profile_path: "stack-profile.cell5-httpd-027.yaml"
+  alas_path: "ALAS2023-2025-1318.txt"
+  cve_id: "CVE-2025-66200"
+  expected:
+    status: "対応不要"
+    missing_config_keys: []

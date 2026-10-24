@@ -1,0 +1,12 @@
+# コンポーネントごとのコンテキスト定義
+# [MEMO] evals セル5用のダミー(case_026): printing: cups で否定(崩れ1)、print_command_has_percent_j は欠落(不成立側)
+components:
+  samba:
+    owner: "xxx@example.com"
+    usage_context: "社内のファイル共有及びCUPS連携によるプリントサーバーとして利用"
+    criticality: "medium"
+    current_configurations:
+      installed: true
+      printing: "cups"
+    operational_constraints:
+      - "パッチ適用時はファイル共有サービスへの影響を考慮して夜間作業とする"

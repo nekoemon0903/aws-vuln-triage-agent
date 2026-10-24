@@ -114,13 +114,14 @@ LLMの評価(evals)において、入力側の条件と期待される出力(正
 | case_023 | 環境依存 | httpd 66200 | suexec_enabled | mod_userdir_enabled: false | 1 | 圧縮 | 未作成 |
 | case_024 | 環境依存 | valkey 86227 | dump.rdbの改ざん | cluster_enabled: false | 1 | 明示 | 未作成 |
 | case_025 | 環境依存 | httpd 65082 | CGIのキー(cgi/cgidとも) | setenv_configured: false | 1 | 圧縮 | 未作成 |
-| case_026 | 不成立側 | samba 4480 | print_command_has_percent_j | printing: "cups" | 1 | 明示 | 未作成 |
-| case_027 | 不成立側 | httpd 66200 | allow_override_fileinfo | mod_userdir_enabled: false | 1 | 圧縮 | 未作成 |
+| case_026 | 不成立側 | samba 4480 | print_command_has_percent_j | printing: "cups" | 1 | 明示 | **作成済** |
+| case_027 | 不成立側 | httpd 66200 | allow_override_fileinfo | mod_userdir_enabled: false | 1 | 圧縮 | **作成済** |
 
 ※注: cgidの既定はMPMによって決まる(上流の01-cgi.confで確認)。case_020のprofile(mod_cgi_enabled: true)はpreforkを示すため、実質は不成立側。配分(4/4/2)を見直すかは2026-11-01に判断する。
 ※既定値の向きの確認状況:
-  - samba: 公式のsmb.conf(5)で確認済み(auto → standalone)
-  - httpd: 上流(CentOS Stream 10)の設定で確認済み(AL2023実機は未確認)
+  - samba: 公式のsmb.conf(5)で確認済み(server_role: auto → standalone、print command既定値に %J 含まれず → 不成立側)
+  - httpd: 上流(CentOS Stream 10)の設定で確認済み(AL2023実機は未確認)。公式ドキュメント(mod_core)にて AllowOverride 既定値がNoneであることを確認済み(FileInfo無効 → 不成立側)
+    - ※userdir.conf側の既定値は未確認(11/01の配分見直し時に確認・扱いを判断)
   - その他: 推定で未確認。ケース作成時に確認する。
 
 ---
