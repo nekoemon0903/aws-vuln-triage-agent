@@ -300,3 +300,25 @@
     status: "要確認"
     missing_config_keys:
       - "installed"
+
+- id: "case_030"
+  cell: 6
+  description: "要確認: samba未登録(nginxのみ登録)。基本形として「プロファイル未記載=未導入」と早合点せず、sambaの導入有無を問えるかを検証"
+  profile_path: "stack-profile.cell6-samba-030.yaml"
+  alas_path: "ALAS2023-2026-1895.txt"
+  cve_id: "CVE-2026-4480"
+  expected:
+    status: "要確認"
+    missing_config_keys:
+      - "installed"
+
+- id: "case_032"
+  cell: 6
+  description: "要確認: openssh未登録(httpd/samba/valkey登録)。詳細な台帳に非掲載でも未導入と錯覚せず、opensshの導入有無を問えるかを検証"
+  profile_path: "stack-profile.cell6-openssh-032.yaml"
+  alas_path: "ALAS2023-2025-865.txt"
+  cve_id: "CVE-2025-26465"
+  expected:
+    status: "要確認"
+    missing_config_keys:
+      - "installed"

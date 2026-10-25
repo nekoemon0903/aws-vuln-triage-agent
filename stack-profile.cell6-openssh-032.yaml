@@ -1,0 +1,33 @@
+# コンポーネントごとのコンテキスト定義
+# [MEMO] evals セル6用のダミー(case_032): openssh が未登録(複数コンポーネント管理の網羅間錯覚)
+components:
+  httpd:
+    owner: "xxx@example.com"
+    usage_context: "社内ポータルWebサーバー"
+    criticality: "medium"
+    current_configurations:
+      installed: true
+      mod_userdir_enabled: false
+      suexec_enabled: false
+    operational_constraints:
+      - "定期メンテナンス時に再起動"
+
+  samba:
+    owner: "xxx@example.com"
+    usage_context: "部門ファイル共有"
+    criticality: "medium"
+    current_configurations:
+      installed: true
+      printing: "cups"
+    operational_constraints:
+      - "日中帯の再起動不可"
+
+  valkey:
+    owner: "xxx@example.com"
+    usage_context: "セッションキャッシュストア"
+    criticality: "medium"
+    current_configurations:
+      installed: true
+      cluster_enabled: false
+    operational_constraints:
+      - "夜間メンテナンスで実施"
