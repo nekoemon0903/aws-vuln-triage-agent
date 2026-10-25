@@ -1,0 +1,12 @@
+# コンポーネントごとのコンテキスト定義
+# [MEMO] evals セル6用のダミー(case_028): httpd が未登録(nginx のみ登録)
+components:
+  nginx:
+    owner: "xxx@example.com"
+    usage_context: "リバースプロキシおよび静的コンテンツ配信"
+    criticality: "high"
+    current_configurations:
+      installed: true
+      proxy_ssl_enabled: true
+    operational_constraints:
+      - "無停止デプロイを実施"

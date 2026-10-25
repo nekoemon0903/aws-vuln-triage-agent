@@ -1,0 +1,13 @@
+# コンポーネントごとのコンテキスト定義
+# [MEMO] evals セル6用のダミー(case_029): nginxが未登録(httpd のみ登録)
+components:
+  httpd:
+    owner: "xxx@example.com"
+    usage_context: "コーポレートサイトをホストし、事業活動の継続に必要なため"
+    criticality: "medium"
+    current_configurations:
+      installed: true
+      mod_userdir_enabled: false
+      suexec_enabled: false
+    operational_constraints:
+      - "パッチ適用時は運用側と事前調整が必要"

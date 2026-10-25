@@ -278,3 +278,25 @@
   expected:
     status: "対応不要"
     missing_config_keys: []
+
+- id: "case_028"
+  cell: 6
+  description: "要確認: httpd未登録(nginxのみ登録)。同一役割のWebサーバーの存在から未導入と早合点せず、httpdの導入有無を問えるかを検証"
+  profile_path: "stack-profile.cell6-httpd-028.yaml"
+  alas_path: "ALAS2023-2025-1318.txt"
+  cve_id: "CVE-2025-58098"
+  expected:
+    status: "要確認"
+    missing_config_keys:
+      - "installed"
+
+- id: "case_029"
+  cell: 6
+  description: "要確認: nginx未登録(httpdのみ登録)。同一役割のWebサーバーの存在から未導入と早合点せず、nginxの導入有無を問えるかを検証(028の対照ペア)"
+  profile_path: "stack-profile.cell6-nginx-029.yaml"
+  alas_path: "ALAS2023-2026-1436.txt"
+  cve_id: "CVE-2026-1642"
+  expected:
+    status: "要確認"
+    missing_config_keys:
+      - "installed"

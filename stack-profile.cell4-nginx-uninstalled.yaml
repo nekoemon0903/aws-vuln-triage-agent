@@ -3,7 +3,7 @@
 components:
   nginx:
     owner: "xxxx@example.com"
-    usage_context: "xxx@example.com"
+    usage_context: "リバースプロキシおよび静的コンテンツ配信"
     criticality: "low"
     current_configurations:
       installed: false
