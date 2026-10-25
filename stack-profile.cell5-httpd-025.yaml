@@ -1,0 +1,12 @@
+# コンポーネントごとのコンテキスト定義
+# [MEMO] evals セル5用のダミー(case_025): setenv_configured: false で否定(崩れ1)、CGIキー(cgi/cgidとも)は欠落(環境依存)
+components:
+  httpd:
+    owner: "xxx@example.com"
+    usage_context: "コーポレートサイトをホストし、事業活動の継続に必要なため"
+    criticality: "medium"
+    current_configurations:
+      installed: true
+      setenv_configured: false
+    operational_constraints:
+      - "パッチ適用(サービス再起動)の際は運用側との事前調整が必要"

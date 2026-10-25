@@ -1,0 +1,12 @@
+# コンポーネントごとのコンテキスト定義
+# [MEMO] evals セル5用のダミー(case_024): cluster_enabled: false で否定(崩れ1)、dump.rdbの改ざんは環境依存(Profile表現外)
+components:
+  valkey:
+    owner: "xxx@example.com"
+    usage_context: "セッションキャッシュ及びキャッシュストアとして利用"
+    criticality: "medium"
+    current_configurations:
+      installed: true
+      cluster_enabled: false
+    operational_constraints:
+      - "パッチ適用時はキャッシュクリアの影響を考慮しメンテナンス時間帯に実施"

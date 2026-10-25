@@ -229,6 +229,36 @@
     status: "対応不要"
     missing_config_keys: []
 
+- id: "case_023"
+  cell: 5
+  description: "対応不要: suexec_enabled が未定義(環境依存)だが、mod_userdir_enabled: falseで否定(崩れ1)。allow_override_fileinfo: true と合わせ、圧縮条件で否定するパターン"
+  profile_path: "stack-profile.cell5-httpd-023.yaml"
+  alas_path: "ALAS2023-2025-1318.txt"
+  cve_id: "CVE-2025-66200"
+  expected:
+    status: "対応不要"
+    missing_config_keys: []
+
+- id: "case_024"
+  cell: 5
+  description: "対応不要: dump.rdb の改ざん(外部要因/環境依存)は未定義(成立と仮定)だが、cluster_enabled: falseで否定(崩れ1)。クラスタ無効により対応不要となるパターン"
+  profile_path: "stack-profile.cell5-valkey-024.yaml"
+  alas_path: "ALAS2023-2026-3091.txt"
+  cve_id: "CVE-2026-86227"
+  expected:
+    status: "対応不要"
+    missing_config_keys: []
+
+- id: "case_025"
+  cell: 5
+  description: "対応不要: mod_cgi_enabled 及び mod_cgid_enabled が未定義(環境依存)だが、setenv_configured: false で否定(崩れ1)。CGIキーの欠落に惑わされずSetEnvで無効で対応不要と判断するパターン"
+  profile_path: "stack-profile.cell5-httpd-025.yaml"
+  alas_path: "ALAS2023-2025-1318.txt"
+  cve_id: "CVE-2025-65082"
+  expected:
+    status: "対応不要"
+    missing_config_keys: []
+
 - id: "case_026"
   cell: 5
   description: "対応不要: print_command_has_percent_jが未定義(不成立側)だが、printing: 'cups'で否定(崩れ1)。既定値で推測補完しても対応不要に倒れるパターン"
