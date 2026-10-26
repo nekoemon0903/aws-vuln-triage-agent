@@ -322,3 +322,43 @@
     status: "要確認"
     missing_config_keys:
       - "installed"
+
+- id: "case_033"
+  cell: 1
+  description: "要対応: OpenSSH 単一フラグの成立。情報が揃っており、発動条件を満たす基本形"
+  profile_path: "stack-profile.cell1-openssh-033.yaml"
+  alas_path: "ALAS2023-2025-865.txt"
+  cve_id: "CVE-2025-26465"
+  expected:
+    status: "要対応"
+    missing_config_keys: []
+
+- id: "case_034"
+  cell: 1
+  description: "要対応: Samba 複数条件の全成立。printingとprint_command_has_percent_jの両方を満たす"
+  profile_path: "stack-profile.cell1-samba-034.yaml"
+  alas_path: "ALAS2023-2026-1895.txt"
+  cve_id: "CVE-2026-4480"
+  expected:
+    status: "要対応"
+    missing_config_keys: []
+
+- id: "case_035"
+  cell: 1
+  description: "要対応: Valkeyプロファイル表現外条件との複合。cluster_enabled: trueに加え、dump.rdbの改ざん(仮定)を満たす"
+  profile_path: "stack-profile.cell1-valkey-035.yaml"
+  alas_path: "ALAS2023-2026-3091.txt"
+  cve_id: "CVE-2026-86227"
+  expected:
+    status: "要対応"
+    missing_config_keys: []
+
+- id: "case_036"
+  cell: 1
+  description: "要対応: Samba falseで成立する逆転条件。standaloneかつcheck_password_scriptに%uがある環境で、rpc_start_on_demand_helpers: false(無効)により発動"
+  profile_path: "stack-profile.cell1-samba-036.yaml"
+  alas_path: "ALAS2023-2026-1895.txt"
+  cve_id: "CVE-2026-4408"
+  expected:
+    status: "要対応"
+    missing_config_keys: []

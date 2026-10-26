@@ -1,0 +1,14 @@
+# コンポーネントごとのコンテキスト定義
+# [MEMO] evals セル1(case_036): Samba falseで成立する逆転条件
+components:
+  samba:
+    owner: "xxx@example.com"
+    usage_context: "スタンドアロンファイルサーバー"
+    criticality: "high"
+    current_configurations:
+      installed: true
+      server_role: "standalone"
+      check_password_script_has_percent_u: true
+      rpc_start_on_demand_helpers: false
+    operational_constraints:
+      - "日中帯の再起動不可"

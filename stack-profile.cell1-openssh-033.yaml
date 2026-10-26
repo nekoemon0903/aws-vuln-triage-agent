@@ -1,0 +1,12 @@
+# コンポーネントごとのコンテキスト定義
+# [MEMO] evals セル1(case_033): OpenSSH 単一フラグの成立(基本形)
+components:
+  openssh:
+    owner: "xxx@example.com"
+    usage_context: "サーバー管理アクセス"
+    criticality: "high"
+    current_configurations:
+      installed: true
+      verify_host_key_dns_enabled: true
+    operational_constraints:
+      - "夜間メンテナンスで実施"

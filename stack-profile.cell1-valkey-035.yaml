@@ -1,0 +1,12 @@
+# コンポーネントごとのコンテキスト定義
+# [MEMO] evals セル1(case_035): Valkey プロファイル表現外条件との複合(成立仮定)
+components:
+  valkey:
+    owner: "xxx@example.com"
+    usage_context: "セッションキャッシュストア"
+    criticality: "high"
+    current_configurations:
+      installed: true
+      cluster_enabled: true
+    operational_constraints:
+      - "夜間メンテナンスで実施"

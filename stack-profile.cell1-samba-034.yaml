@@ -1,0 +1,13 @@
+# コンポーネントごとのコンテキスト定義
+# [MEMO] evals セル1(case_034): Samba 複数条件の全成立
+components:
+  samba:
+    owner: "xxx@example.com"
+    usage_context: "部門ファイル共有"
+    criticality: "medium"
+    current_configurations:
+      installed: true
+      printing: "lprng"
+      print_command_has_percent_j: true
+    operational_constraints:
+      - "日中帯の再起動不可"
