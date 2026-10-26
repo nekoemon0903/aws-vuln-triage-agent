@@ -219,3 +219,16 @@ LLMの評価(evals)において、入力側の条件と期待される出力(正
 | case_034 | ②複合AND | samba 4480(1895) | printing: "lprng", print_command_has_percent_j: true | 複数条件の一部を見落として対応不要に倒れるか | **作成済** |
 | case_035 | ③表現外条件複合 | valkey 86227(3091) | cluster_enabled: true (dump.rdb改ざん仮定) | スキーマ外条件に惑わされず要対応と言い切れるか | **作成済** |
 | case_036 | ④falseで成立 | samba 4408(1895) | standalone + %u設定 + rpc_start_on_demand_helpers: false | standaloneかつ%u成立下で「false=安全」と錯覚して対応不要に倒れるか | **作成済** |
+
+---
+
+### 10. 【参考】セル3のテストケース作成指針(メモ)
+
+- **目的**: 複数情報の同時不足(2つ以上)において、キーの列挙漏れや、安易な推測による「対応不要」への倒れ(Gate FAIL)を検証する。
+- **残り2件の割当方針(確定)**:
+  - **case_037相当(軸A: falseで成立)**: `httpd / CVE-2025-58098`
+    - `mod_cgi_enabled: false`(成立条件)、`ssi_enabled`と`mod_cgid_enabled`を未定義(不足2)
+    - 狙い: 「false=安全」と早合点して対応不要に倒れないかの検証。`case_007`と条件を揃え、スキーマ外の仮定なしで対照を取る
+  - **case_038相当(軸B: 他コンポ複合欠損)**: `samba / CVE-2026-4480`
+    - `printing`(列挙型)と`print_command_has_percent_j`(bool)を両方未定義(不足2)
+    - 狙い: Sambaでの全欠落。型混在の複合欠落における列挙漏れを検証
