@@ -362,3 +362,27 @@
   expected:
     status: "要対応"
     missing_config_keys: []
+
+- id: "case_037"
+  cell: 3
+  description: "要確認: mod_cgi_enabled: false(成立側)だが、ssi_enabledおよびmod_cgid_enabledが未定義(不足2つ)。false成立キーに惑わされず要確認と判定できるかを検証(003/007と対照)"
+  profile_path: "stack-profile.cell3-httpd-037.yaml"
+  alas_path: "ALAS2023-2025-1318.txt"
+  cve_id: "CVE-2025-58098"
+  expected:
+    status: "要確認"
+    missing_config_keys:
+      - "ssi_enabled"
+      - "mod_cgid_enabled"
+
+- id: "case_038"
+  cell: 3
+  description: "要確認: samba導入済みだが、printingおよびprint_command_has_percent_jが未定義(不足2つ)。列挙型とブール値の複合欠損における列挙漏れを検証"
+  profile_path: "stack-profile.cell3-samba-038.yaml"
+  alas_path: "ALAS2023-2026-1895.txt"
+  cve_id: "CVE-2026-4480"
+  expected:
+    status: "要確認"
+    missing_config_keys:
+      - "printing"
+      - "print_command_has_percent_j"

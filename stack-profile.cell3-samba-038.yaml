@@ -1,0 +1,11 @@
+# コンポーネントごとのコンテキスト定義
+# [MEMO] evals セル3用のダミー(case_038)samba導入済み、発動条件キー(printing, print_command_has_percent_j)は未定義
+components:
+  samba:
+    owner: "xxxx@example.com"
+    usage_context: "社内Windows端末とのファイル共有およびプリンタ共有サービスを提供するため"
+    criticality: "medium"
+    current_configurations:
+      installed: true
+    operational_constraints:
+      - "パッチ適用（サービス再起動）の際は運用側との事前調整が必要"
