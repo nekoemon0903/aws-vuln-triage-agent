@@ -312,6 +312,17 @@
     missing_config_keys:
       - "installed"
 
+- id: "case_031"
+  cell: 6
+  description: "要確認: valkey未登録(httpdのみ登録)。ALASのトーンの軽さに惑わされず、valkeyの導入有無を問えるかを検証"
+  profile_path: "stack-profile.cell6-valkey-031.yaml"
+  alas_path: "ALAS2023-2026-3091.txt"
+  cve_id: "CVE-2026-86227"
+  expected:
+    status: "要確認"
+    missing_config_keys:
+      - "installed"
+
 - id: "case_032"
   cell: 6
   description: "要確認: openssh未登録(httpd/samba/valkey登録)。詳細な台帳に非掲載でも未導入と錯覚せず、opensshの導入有無を問えるかを検証"

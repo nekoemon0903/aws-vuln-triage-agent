@@ -1,0 +1,12 @@
+# コンポーネントごとのコンテキスト定義
+# [MEMO] evals セル6用のダミー(case_031)valkey未登録(httpdのみ登録)。ALASのトーンの軽さに惑わされず、valkeyの導入有無を問えるか
+components:
+  httpd:
+    owner: "xxx@example.com"
+    usage_context: "コーポレートWebサイト"
+    criticality: "high"
+    current_configurations:
+      installed: true
+      ssi_enabled: false
+      mod_cgi_enabled: false
+      mod_cgid_enabled: false
