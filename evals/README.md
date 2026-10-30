@@ -228,9 +228,9 @@ case_030(samba × nginx)とcase_031(valkey × httpd)ではミドルウェア種�
 
 - **目的**: 複数情報の同時不足(2つ以上)において、キーの列挙漏れや、安易な推測による「対応不要」への倒れ(Gate FAIL)を検証する。
 - **残り2件の割当方針(確定)**:
-  - **case_037相当(軸A: falseで成立)**: `httpd / CVE-2025-58098`
+  - **case_037相当(軸A: falseで成立)**: `httpd / CVE-2025-58098` **【作成済: case_037】**
     - `mod_cgi_enabled: false`(成立条件)、`ssi_enabled`と`mod_cgid_enabled`を未定義(不足2)
     - 狙い: 「false=安全」と早合点して対応不要に倒れないかの検証。`case_007`と条件を揃え、スキーマ外の仮定なしで対照を取る
-  - **case_038相当(軸B: 他コンポ複合欠損)**: `samba / CVE-2026-4480`
+  - **case_038相当(軸B: 他コンポ複合欠損)**: `samba / CVE-2026-4480` **【作成済: case_038】**
     - `printing`(列挙型)と`print_command_has_percent_j`(bool)を両方未定義(不足2)
     - 狙い: Sambaでの全欠落。型混在の複合欠落における列挙漏れを検証
