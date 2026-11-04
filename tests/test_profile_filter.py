@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 import yaml
 
@@ -183,3 +185,94 @@ def test_extract_facts_profile_empty_component_warn(empty_val, capsys):
     assert "httpd" in parsed["components"]
     assert "[WARN]" in captured.err
     assert "php" in captured.err
+
+
+# --- current_configurations 誤記検出テスト ---
+
+
+def test_extract_facts_profile_unknown_config_key_raises_error():
+    """
+    検証内容: 登録済みコンポーネントの current_configurations に誤記(未知のキー)が含まれる場合、
+             LLMへのサイレントな通過を防ぐため ValueError を送出し、エラーにコンポーネント名とキー名が含まれること
+    """
+    yaml_input = """
+    components:
+      httpd:
+        owner: "web-admin@example.com"
+        current_configurations:
+          installed: true
+          mod_userdir_enable: true # 誤記(正: mod_userdir_enabled)
+    """
+
+    with pytest.raises(ValueError) as exc_info:
+        extract_facts_profile(yaml_input)
+
+    err_msg = str(exc_info.value)
+    # コンポーネント名と誤記キー名の両方が含まれていることをアサート
+    assert "httpd" in err_msg
+    assert "mod_userdir_enable" in err_msg
+
+
+def test_extract_facts_profile_valid_config_keys_passes():
+    """
+    検証内容: 登録済みコンポーネントの current_configurations が許可キーのみで構成されている場合、
+             エラーなく正常に抽出・処理されること(正常系)
+    """
+    yaml_input = """
+    components:
+      httpd:
+        current_configurations:
+          installed: true
+          ssi_enabled: true
+          mod_cgi_enabled: false
+      valkey:
+        current_configurations:
+          installed: true
+          cluster_enabled: true
+    """
+
+    result = extract_facts_profile(yaml_input)
+    assert result is not None
+    assert "mod_cgi_enabled" in result
+    assert "cluster_enabled" in result
+
+
+def test_extract_facts_profile_unregistered_component_warns_and_passes(capsys):
+    """
+    検証内容: ALLOWED_CONFIG_KEYSに登録されていない未知のコンポーネントの場合、
+             処理は中断せず通過するが、タイポ等に気づけるよう stderr に WARN を出力すること
+    """
+    yaml_input = """
+    components:
+      htttpd:  # 未登録・誤記コンポーネント名
+        current_configurations:
+          some_config: true
+      valkey:
+        current_configurations:
+          installed: true
+          cluster_enabled: true
+    """
+
+    result = extract_facts_profile(yaml_input)
+    captured = capsys.readouterr()
+
+    # 処理は中断せず valkey などの設定が抽出されること
+    assert result is not None
+    assert "cluster_enabled" in result
+
+    # 警告が stderr に出力されていること(stdoutではなくstderrを厳密に検証)
+    assert "[WARN]" in captured.err
+    assert "htttpd" in captured.err
+
+
+def test_all_real_profiles_are_valid():
+    """
+    検証内容: リポジトリ内の全ての実profile(stack-profile*.yaml)が一覧漏れ(誤検知)なく正常にバリデーションを通過すること
+    """
+    profile_files = list(Path(".").glob("**/stack-profile*.yaml"))
+    assert len(profile_files) > 0, "実profileファイルが見つかりません"
+
+    for profile_path in profile_files:
+        content = profile_path.read_text(encoding="utf-8")
+        # 既存profileでValueErrorが発生しないことを確認(誤検知の防止)
+        extract_facts_profile(content)

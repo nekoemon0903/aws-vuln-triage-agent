@@ -29,6 +29,38 @@ KNOWN_IGNORED_PROFILE_KEYS = {
     "operational_constraints",
 }
 
+# 全コンポーネント共通の許可キー
+COMMON_CONFIG_KEYS = {"installed"}
+
+# コンポーネントごとの current_configurations 許可キー一覧
+ALLOWED_CONFIG_KEYS = {
+    "httpd": {
+        "ssi_enabled",
+        "mod_cgi_enabled",
+        "mod_cgid_enabled",
+        "allow_override_fileinfo",
+        "suexec_enabled",
+        "mod_userdir_enabled",
+        "setenv_configured",
+    },
+    "samba": {
+        "printing",
+        "print_command_has_percent_j",
+        "rpc_start_on_demand_helpers",
+        "server_role",
+        "check_password_script_has_percent_u",
+    },
+    "valkey": {
+        "cluster_enabled",
+    },
+    "openssh": {
+        "verify_host_key_dns_enabled",
+    },
+    "nginx": {
+        "proxy_ssl_enabled",
+    },
+}
+
 # === スキーマ定義 ===
 
 
@@ -215,6 +247,30 @@ def extract_facts_profile(raw_yaml_str: str) -> str:
 
                 # 対象キーの抽出
                 if target_subkey in comp_val:
+                    sub_val = comp_val[target_subkey]
+                    # current_configurationsの未知キー検査
+                    if target_subkey == "current_configurations" and isinstance(
+                        sub_val, dict
+                    ):
+                        if comp_name not in ALLOWED_CONFIG_KEYS:
+                            # 未登録コンポーネント: 止めずに stderr に警告を出す
+                            print(
+                                f"[WARN] components.{comp_name}は ALLOWED_CONFIG_KEYS に未登録のため、キー検査をスキップします",
+                                file=sys.stderr,
+                            )
+                        else:
+                            allowed = (
+                                ALLOWED_CONFIG_KEYS[comp_name] | COMMON_CONFIG_KEYS
+                            )
+                            unknown_keys = set(sub_val.keys()) - allowed
+                            if unknown_keys:
+                                formatted_keys = ",".join(
+                                    f"'{k}'" for k in sorted(unknown_keys)
+                                )
+                                raise ValueError(
+                                    f"components.{comp_name}.current_configurations に未知のキーが検出されました: {formatted_keys}"
+                                )
+
                     filtered_sub[comp_name] = {target_subkey: comp_val[target_subkey]}
                 else:
                     print(
