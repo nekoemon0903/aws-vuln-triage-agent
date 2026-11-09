@@ -397,3 +397,15 @@
     missing_config_keys:
       - "printing"
       - "print_command_has_percent_j"
+
+- id: "case_039"
+  cell: 3
+  description: "要確認: httpd 登録済み(installed: true)だが mod_cgi/cgid と setenv_configured がともに未記載(2つ欠け)。CGI有効を問うキーは mod_cgi_enabled/mod_cgid_enabledのどちらでも正とし、網羅率は参考値・目視確認(2026-11-09)"
+  profile_path: "stack-profile.cell3-httpd-env-039.yaml"
+  alas_path: "ALAS2023-2025-1318.txt"
+  cve_id: "CVE-2025-65082"
+  expected:
+    status: "要確認"
+    missing_config_keys:
+      - "mod_cgi_enabled"      # mod_cgid_enabled でも可(目視で許容)
+      - "setenv_configured"

@@ -1,0 +1,11 @@
+# コンポーネントごとのコンテキスト定義
+# [MEMO] evals セル3用のダミー(case_039): httpd 登録済み(installed: true)だが mod_cgi/cgid と setenv_configured がともに未記載(2つ欠け)
+components:
+  httpd:
+    owner: "xxx@example.com"
+    usage_context: "コーポレートサイトをホストし、事業活動の継続に必要なため"
+    criticality: "medium"
+    current_configurations:
+      installed: true
+    operational_constraints:
+      - "パッチ適用(サービス再起動)の際は運用側との事前調整が必要"
