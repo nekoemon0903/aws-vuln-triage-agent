@@ -147,6 +147,7 @@ def generate_prompt(profile_yaml: str, alas_text: str) -> str:
     """
     return prompt
 
+
 # === ステータス集計ロジック ===
 
 

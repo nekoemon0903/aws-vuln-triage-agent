@@ -120,7 +120,7 @@ KEY_CONCEPT_MAP: dict[str, str] = {
     "mod_suexec_enabled": "suexec_enabled",
     # 3. SSI(正解表記: ssi_enabled)
     "mod_ssi_enabled": "ssi_enabled",
-    "mod_include_enabled": "ssi_enabled", # Apache で SSI を実装しているモジュールが mod_include
+    "mod_include_enabled": "ssi_enabled",  # Apache で SSI を実装しているモジュールが mod_include
 }
 
 
