@@ -105,6 +105,30 @@ def calculate_accuracy_rate(
     return match_count / 5.0
 
 
+# === 概念正規化マッピング ===
+# 網羅率評価において、同一の調査スロットを指す接頭辞・モジュール名の表記揺れを吸収する。
+# 推測による誤爆を防ぐため、正解データに実在する3概念の観測済み表記揺れのみを列挙型で定義する。
+# ※ mod_cgi_enabled / mod_cgid_enabled は別々の正解キー(case_003等)のため統合しない。
+KEY_CONCEPT_MAP: dict[str, str] = {
+    # 1. 導入有無(正解表記: installed)
+    "valkey_installed": "installed",
+    "httpd_installed": "installed",
+    "nginx_installed": "installed",
+    "openssh_installed": "installed",
+    "samba_installed": "installed",
+    # 2. suexec(正解表記: suexec_enabled)
+    "mod_suexec_enabled": "suexec_enabled",
+    # 3. SSI(正解表記: ssi_enabled)
+    "mod_ssi_enabled": "ssi_enabled",
+    "mod_include_enabled": "ssi_enabled", # Apache で SSI を実装しているモジュールが mod_include
+}
+
+
+def normalize_key(key: str) -> str:
+    """不足キーの表記揺れを同一概念の代表キーに正規化する"""
+    return KEY_CONCEPT_MAP.get(key, key)
+
+
 def calculate_key_coverage_rate(
     expected_missing_keys: list[str],
     run_results: list[CaseRunResult],
@@ -113,6 +137,7 @@ def calculate_key_coverage_rate(
 
     - 正解の不足キーが空リストの場合はNone(対象外)
     - 失敗した実行や正解キーを含まない実行は網羅率0.0として分母(5)に含める
+    - キー名の既知の表記揺れは normalize_key() で同一概念に正規化して照合する
     """
     if len(run_results) != 5:
         raise ValueError("run_results count must be exactly 5")
@@ -120,12 +145,12 @@ def calculate_key_coverage_rate(
     if not expected_missing_keys:
         return None
 
-    expected_set = set(expected_missing_keys)
+    expected_set = {normalize_key(k) for k in expected_missing_keys}
     total_coverage = 0.0
 
     for res in run_results:
         if res.outcome == ExecutionOutcome.SUCCESS and res.actual_missing_keys:
-            actual_set = set(res.actual_missing_keys)
+            actual_set = {normalize_key(k) for k in res.actual_missing_keys}
             hit_count = len(expected_set & actual_set)
             run_coverage = hit_count / len(expected_set)
             total_coverage += run_coverage

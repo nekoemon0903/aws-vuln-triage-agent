@@ -7,6 +7,7 @@ from src.scoring import (
     calculate_accuracy_rate,
     calculate_key_coverage_rate,
     evaluate_gate,
+    normalize_key,
     summarize_case_evaluation,
 )
 
@@ -25,6 +26,19 @@ def make_run_result(
         actual_status=actual_status if outcome == ExecutionOutcome.SUCCESS else None,
         error_message=error_message,
     )
+
+
+def make_5_run_results(
+    actual_missing_keys: list[str],
+    actual_status: Status = Status.NEED_CHECK,
+) -> list[CaseRunResult]:
+    """同じ actual_missing_keys を持つ5回分の成功結果を生成するヘルパー関数"""
+    results = []
+    for i in range(1, 6):
+        r = make_run_result(i, actual_status=actual_status)
+        r.actual_missing_keys = actual_missing_keys
+        results.append(r)
+    return results
 
 
 # 観点1: 危険側で、5回とも正解 → 合格
@@ -205,3 +219,102 @@ def test_evaluate_gate_unaffected_by_result_order(error_run_index):
     # エラーが発生した回数がメッセージに正しく含まれること
     assert len(reasons) == 1
     assert f"Run {error_run_index}" in reasons[0]
+
+
+# === 概念一致マッチャのテスト ===
+
+
+@pytest.mark.parametrize(
+    ("expected_keys", "actual_keys"),
+    [
+        # 1. 導入有無(installed) - 双方向
+        (["installed"], ["valkey_installed"]),
+        (["installed"], ["httpd_installed"]),
+        (["installed"], ["nginx_installed"]),
+        (["installed"], ["openssh_installed"]),
+        (["installed"], ["samba_installed"]),
+        (["samba_installed"], ["installed"]),
+        # 2. suexec (suexec_enabled) - 双方向
+        (["suexec_enabled"], ["mod_suexec_enabled"]),
+        (["mod_suexec_enabled"], ["suexec_enabled"]),
+        # 3. SSI (ssi_enabled) - 双方向
+        (["ssi_enabled"], ["mod_ssi_enabled"]),
+        (["ssi_enabled"], ["mod_include_enabled"]),
+        (["mod_ssi_enabled"], ["ssi_enabled"]),
+        # 4. 複合ケース(CVE-2026-3238相当: 一部のみ表記揺れするパターン)
+        (
+            ["samba_installed", "check_password_script_u_substitution"],
+            ["installed", "check_password_script_u_substitution"],
+        ),
+    ],
+)
+def test_calculate_key_coverage_rate_concept_match(
+    expected_keys: list[str], actual_keys: list[str]
+):
+    """
+    検証内容: 3概念(installed / suexec / SSI)の接頭辞・モジュール名の表記揺れが双方向で一致し、網羅率が1.0になること。
+    振る舞い検証: 正解側・LLM出力側のどちらに揺れがあっても同一概念として吸収し、正当な指摘を取りこぼさないことを保証する。
+    """
+    results = make_5_run_results(actual_keys)
+    assert calculate_key_coverage_rate(expected_keys, results) == pytest.approx(1.0)
+
+
+@pytest.mark.parametrize(
+    ("expected_keys", "actual_keys", "expected_rate"),
+    [
+        # mod_cgi_enabled と mod_cgid_enabled は別概念のまま維持する(case_007 / 008)
+        (["mod_cgi_enabled"], ["mod_cgid_enabled"], 0.0),
+        (["mod_cgid_enabled"], ["mod_cgi_enabled"], 0.0),
+        # case_003形式: 片方だけ出力した場合は1.0ではなく0.5になること(水増し防止)
+        (["mod_cgi_enabled", "mod_cgid_enabled"], ["mod_cgi_enabled"], 0.5),
+        (["mod_cgi_enabled", "mod_cgid_enabled"], ["mod_cgid_enabled"], 0.5),
+        # 反対語・類似名・スコープ外キーに誤爆しないこと
+        (["installed"], ["not_installed"], 0.0),
+        (["installed"], ["httpd_version"], 0.0),
+        (["suexec_enabled"], ["sudo_enabled"], 0.0),
+        (["ssi_enabled"], ["ssl_enabled"], 0.0),
+    ],
+)
+def test_calculate_key_coverage_rate_does_not_match_different_concepts(
+    expected_keys: list[str], actual_keys: list[str], expected_rate: float
+):
+    """
+    検証内容: 別概念のキー(特に mod_cgi_enabled と mod_cgid_enabled)では同一視されず、期待通りの網羅率(0.0や0.5)になること。
+    振る舞い検証: 列挙型辞書に登録されていない別概念や反対語を誤って同一視しないこと、および将来誤って cgi/cgid が統合された際に検知できることを保証する。
+    """
+    results = make_5_run_results(actual_keys)
+    assert calculate_key_coverage_rate(expected_keys, results) == pytest.approx(
+        expected_rate
+    )
+
+
+def test_calculate_key_coverage_rate_no_double_count_on_synonyms():
+    """
+    検証内容: LLMが同一概念の同義語を複数同時に出力した場合でも、重複カウントされず網羅率が1.0になること。
+    振る舞い検証: 正規化後に集合(set)で積集合を取ることで、同義語の同時出力による網羅率の水増し(1.0超え)を防ぐ。
+    """
+    results = make_5_run_results(["installed", "samba_installed"])
+    assert calculate_key_coverage_rate(["installed"], results) == pytest.approx(1.0)
+
+
+def test_cases_yaml_expected_keys_do_not_merge_after_normalization():
+    """
+    検証内容: evals/cases.yaml の全ケースにおいて、正規化の前後で正解不足キーの要素数が変わらないこと。
+    振る舞い検証: 同一ケース内に定義された異なる正解キー同士が、概念正規化によって誤って1つに合流し分母が減るバグがないことを保証する。
+    """
+    from pathlib import Path
+
+    import yaml
+
+    cases_path = Path(__file__).resolve().parent.parent / "evals" / "cases.yaml"
+    assert cases_path.exists(), f"cases.yaml が見つかりません: {cases_path}"
+
+    cases = yaml.safe_load(cases_path.read_text(encoding="utf-8"))
+    for case in cases:
+        keys = case.get("expected", {}).get("missing_config_keys") or case.get(
+            "missing_config_keys", []
+        )
+        normalized_keys = {normalize_key(k) for k in keys}
+        assert len(normalized_keys) == len(set(keys)), (
+            f"{case.get('id')}: 正規化により正解キーが合流しました ({keys} -> {normalized_keys})"
+        )
